@@ -1,0 +1,33 @@
+﻿Generellt ------------------
+
+* Göra Projekt-basen
+	- Deadline: Ons 21/3 Kväll
+
+
+Filip ----------------------
+
+* Back-face Culling (w. G-Shader)
+
+* Parsing and rendering an existing model format
+
+* (1) Particle system
+
+
+William --------------------
+
+* Normal Mapping
+
+* Shadow Mapping
+
+* View frustum culling against a quadtree
+
+* (2) Mouse picking
+
+
+Joakim ---------------------
+
+* Deffered Rendering
+
+* Height-map Terrain + * Camera, Röra med WASD
+
+* Glow-effect

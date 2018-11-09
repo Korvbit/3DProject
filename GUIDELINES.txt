@@ -1,0 +1,10 @@
+Guidelines ------------------------------
+
+* Stor bokstav på filnamn
+
+* Alla stora bokstäver på konstanter
+
+* Pekar-namn avslutas med 'ptr'
+
+* Globala variabler börjar med 'g'
+

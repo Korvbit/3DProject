@@ -1,0 +1,3 @@
+﻿  Main.cpp
+c:\users\joaki\documents\github\3d-prog-project\opengl\projekt\main.cpp(59): warning C4244: '=': conversion from 'deltatime_t' to 'tick_t', possible loss of data
+  Projekt.vcxproj -> C:\Users\joaki\Documents\GitHub\3D-Prog-Project\OpenGl\Projekt\Debug\Projekt.exe
