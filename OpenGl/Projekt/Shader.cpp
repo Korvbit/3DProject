@@ -8,17 +8,16 @@ Shader::Shader()
 {
 	program = glCreateProgram();
 	this->NUM_OF_SHADERS = 0;
-
-	/*shaders[0] = CreateShader(LoadShader(fileName + ".vs"), GL_VERTEX_SHADER);
-	shaders[1] = CreateShader(LoadShader(fileName + ".gs"), GL_GEOMETRY_SHADER);
-	shaders[2] = CreateShader(LoadShader(fileName + ".fs"), GL_FRAGMENT_SHADER);*/
-
-	// const std::string& fileName
 }
 
 void Shader::Bind()
 {
 	glUseProgram(program);
+}
+
+void Shader::unBind()
+{
+	glUseProgram(0);
 }
 
 void Shader::Update(const Transform & transform, const Camera& camera)
@@ -32,7 +31,7 @@ void Shader::Update(const Transform & transform, const Camera& camera)
 	glUniformMatrix4fv(uniforms[WORLD_U], 1, GL_FALSE, &modelW[0][0]);
 }
 
-void Shader::initateShaders()
+void Shader::initiateShaders()
 {
 	for (unsigned int i = 0; i < NUM_OF_SHADERS; i++)
 		glAttachShader(program, shaders[i]);
@@ -61,6 +60,11 @@ Shader::~Shader()
 	}
 
 	glDeleteProgram(program);
+}
+
+void Shader::sendGBufferVariablesToGPU(const char *name, int value)
+{
+	glUniform1i(glGetUniformLocation(program, name), value);
 }
 
 void CheckShaderError(GLuint shader, GLuint flag, bool isProgram, const std::string & errorMessage)
@@ -132,4 +136,9 @@ GLuint Shader::CreateShader(const std::string & fileName, GLenum shaderType)
 
 	shaders[this->NUM_OF_SHADERS++] = shader;
 	return shader;
+}
+
+GLuint *Shader::getProgram()
+{
+	return &this->program;
 }

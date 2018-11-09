@@ -7,7 +7,6 @@
 class Transform
 {
 public:
-	// Filip vafan är detta för nått?!?!?!?!?!??!?!??!?!!?!?!?!??!?!??!?!?!??!?!?!??!?!?!?!?
 	Transform(const glm::vec3& trans = glm::vec3(), const glm::vec3& rot = glm::vec3(),  const glm::vec3& scale = glm::vec3(1.0f,1.0f,1.0f)):
 		m_trans(trans),
 		m_rot(rot),

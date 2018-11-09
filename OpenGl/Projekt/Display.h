@@ -1,24 +1,23 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
-
+#include <glew\glew.h>
+#include <GLFW/glfw3.h>
 #include <string>
-#include <sdl2\SDL.h>
-
 using namespace std;
 
 class Display
 {
 public:
-	Display(int width, int height, const string title);
+	Display(int width, int height);
 
-	void SwapBuffers();
+	void SwapBuffers(int width, int height);
 	bool IsWindowClosed();
 
 	virtual ~Display();
-private:
-	SDL_Window* windowPtr;
-	SDL_GLContext context;
-	bool isWindowClosed;
-};
 
-#endif //DISPLAY_H
+	GLFWwindow *getWindow();
+private:
+	GLFWwindow *window;
+
+};
+#endif //DISPLAY_H*/

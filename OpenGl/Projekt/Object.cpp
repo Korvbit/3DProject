@@ -8,6 +8,10 @@ Object::Object(Mesh *mesh, Transform transform, Texture *texture, unsigned int m
 	this->m_id = m_id;
 }
 
+Object::Object()
+{
+}
+
 glm::mat4 Object::getWorldMatrix() const
 {
 	return this->transform.getWorldMatrix();

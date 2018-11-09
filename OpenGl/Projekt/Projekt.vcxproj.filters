@@ -51,6 +51,15 @@
     <ClCompile Include="timer.c">
       <Filter>Resource Files</Filter>
     </ClCompile>
+    <ClCompile Include="GBuffer.cpp">
+      <Filter>Class cpp.Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PointLight.cpp">
+      <Filter>Class cpp.Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Class cpp.Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Display.h">
@@ -83,15 +92,27 @@
     <ClInclude Include="timer.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
+    <ClInclude Include="GBuffer.h">
+      <Filter>Class h.Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PointLight.h">
+      <Filter>Class h.Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shader.vs">
+    <None Include="lightPass.fs">
       <Filter>Shader Files</Filter>
     </None>
-    <None Include="Shader.gs">
+    <None Include="lightPass.vs">
       <Filter>Shader Files</Filter>
     </None>
-    <None Include="Shader.fs">
+    <None Include="geometryPass.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="geometryPass.gs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="geometryPass.vs">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

@@ -6,39 +6,46 @@
 class Camera
 {
 public:
-	Camera(const glm::vec3& pos, float fov, float aspect, float zNear, float zFar)
-	{
-		projectionMatrix = glm::perspective(fov, aspect, zNear, zFar);
-		cameraPosition = pos;
-		forwardVector = glm::vec3(0, 0, 1);
-		upVector = glm::vec3(0, 1, 0);
-		viewMatrix = glm::lookAt(cameraPosition, cameraPosition + forwardVector, upVector);
-	}
+	Camera(const glm::vec3& pos, float fov, float aspect, float zNear, float zFar);
 
-	inline glm::mat4 getViewProjection() const
-	{
-		return projectionMatrix * viewMatrix;
-	}
+	glm::mat4 getViewProjection() const;
+	virtual ~Camera();
 
-	/*
-	inline glm::vec3 setCameraPosition(glm::vec3 pos)
-	{
-		cameraPosition = pos;
-		viewMatrix = glm::lookAt(cameraPosition, cameraPosition + forwardVector, upVector);
-	}*/
+	// These functions are for camera control and movement
+	void mouseUpdate(const glm::vec2& newMousePosition);
+	void setCameraPosition(glm::vec3 camPos);
+	void setForwardVector(glm::vec3 forwardVector);
 
+	glm::vec3 getForwardVector();
+	glm::vec3 getCameraPosition();
+	glm::vec3 getStartCameraPosition();
+	glm::vec3 getStartForwardVector();
 
-	virtual ~Camera()
-	{
+	void moveForward();
+	void moveBackward();
+	void moveRight();
+	void moveLeft();
+	void moveUp();
+	void moveDown();
 
-	}
-
+	void updateViewMatrix();
 private:
 	glm::mat4 projectionMatrix;
 	glm::mat4 viewMatrix;
 	glm::vec3 cameraPosition;
-	glm::vec3 forwardVector;
+	glm::vec3 forwardVector;	// Viewvector // frontal view
 	glm::vec3 upVector;
+
+	glm::vec3 startCameraPosition;
+	glm::vec3 startForwardVector;
+
+	// Used for mouseUpdate
+	glm::vec2 oldMousePosition;
+	glm::vec2 mouseDelta;
+	// The vector which we rotate around during the vertical camera rotation.
+	glm::vec3 rotateAround;
+	const float rotationalSpeed = 0.01f;
+	const float movementSpeed = 0.08f;
 
 };
 

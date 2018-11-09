@@ -15,10 +15,14 @@ public:
 	Shader();
 
 	void Bind();
+	void unBind();
 	void Update(const Transform& transform, const Camera& camera);
-	void initateShaders();
-	//const std::string& fileName
+	void initiateShaders();
+
 	GLuint CreateShader(const std::string& fileName, GLenum shaderType);
+	GLuint *getProgram();
+
+	void sendGBufferVariablesToGPU(const char *name, int value);
 
 	virtual ~Shader();
 private:

@@ -2,51 +2,55 @@
 #include <glew/glew.h>
 #include <iostream>
 
-Display::Display(int width, int height, const string title)
+Display::Display(int width, int height)
 {
-	SDL_Init(SDL_INIT_EVERYTHING);
+	if (!glfwInit())
+		exit(EXIT_FAILURE);
 
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
-	windowPtr = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
-	context = SDL_GL_CreateContext(windowPtr);
+	this->window = glfwCreateWindow(width, height, "Open GL Project", NULL, NULL);
 
+	if (!window)
+	{
+		glfwTerminate();
+		exit(EXIT_FAILURE);
+	}
+	glfwMakeContextCurrent(window);
+	glfwSwapInterval(1);
+
+
+	// Glew init behövs för att glCreateProgram ska funka
 	GLenum status = glewInit();
 
-	if (status != GLEW_OK) 
+	if (status != GLEW_OK)
 	{
 		std::cerr << "Glew failed to initialize!" << endl;
 	}
-
-	isWindowClosed = false;
 }
 
-void Display::SwapBuffers()
+void Display::SwapBuffers(int width, int height)
 {
-	SDL_GL_SwapWindow(windowPtr);
+	glfwGetFramebufferSize(window, &width, &height);
 
-	SDL_Event e;
-
-	while (SDL_PollEvent(&e))
-	{
-		if (e.type == SDL_QUIT)
-			isWindowClosed = true;
-	}
+	glfwSwapBuffers(window);
+	glfwPollEvents();
 }
 
 bool Display::IsWindowClosed()
 {
-	return isWindowClosed;
+	return glfwWindowShouldClose(this->window);
 }
 
 Display::~Display()
 {
-	SDL_GL_DeleteContext(context);
-	SDL_DestroyWindow(windowPtr);
-	SDL_Quit();
+	glfwDestroyWindow(this->window);
+	glfwTerminate;
+	exit(EXIT_SUCCESS);
+}
+
+GLFWwindow * Display::getWindow()
+{
+	return this->window;
 }

@@ -1,3 +1,12 @@
 ﻿  Main.cpp
-c:\users\joaki\documents\github\3d-prog-project\opengl\projekt\main.cpp(59): warning C4244: '=': conversion from 'deltatime_t' to 'tick_t', possible loss of data
+c:\users\joaki\documents\github\3d-prog-project\opengl\projekt\main.cpp(168): warning C4244: '=': conversion from 'deltatime_t' to 'tick_t', possible loss of data
+c:\users\joaki\documents\github\3d-prog-project\opengl\projekt\main.cpp(244): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\joaki\documents\github\3d-prog-project\opengl\projekt\main.cpp(248): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\joaki\documents\github\3d-prog-project\opengl\projekt\main.cpp(254): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\joaki\documents\github\3d-prog-project\opengl\projekt\main.cpp(258): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\joaki\documents\github\3d-prog-project\opengl\projekt\main.cpp(259): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\joaki\documents\github\3d-prog-project\opengl\projekt\main.cpp(263): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\joaki\documents\github\3d-prog-project\opengl\projekt\main.cpp(264): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  Mesh.cpp
+  Generating Code...
   Projekt.vcxproj -> C:\Users\joaki\Documents\GitHub\3D-Prog-Project\OpenGl\Projekt\Debug\Projekt.exe

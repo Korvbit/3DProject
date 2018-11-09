@@ -4,9 +4,6 @@
 #include <glm\glm.hpp>
 #include <glew\glew.h>
 
-
-
-
 class Vertex
 {
 public:
@@ -22,10 +19,6 @@ private:
 	glm::vec3 pos;
 	glm::vec2 texCoord;
 };
-
-
-
-
 
 class Mesh
 {
