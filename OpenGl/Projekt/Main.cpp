@@ -118,29 +118,21 @@ int main()
 	Transform transformTriangleTest;
 	
 	ObjectHandler OH = ObjectHandler();
-	Object objects[11];
-	for (int i = 0; i < 11; i++)
+	Object objects[12];
+	for (int i = 0; i < 12; i++)
 	{
 		objects[i] = OH.CreateObject(&mesh, transform, &texture);
 		if (i == 10)
 		{
 			objects[i] = OH.CreateObject(&planeMesh, transform, &texture);
 		}
+		if (i == 11)
+		{
+			objects[i] = OH.CreateObject("ObjectFiles/srd.obj", transform, &texture);
+		}
 	}
 	
 	Object triangleTest = OH.CreateObject(&triangleTestMesh, transformTriangleTest, &texture);
-
-	std::vector<glm::vec3> vertices5;
-	std::vector<glm::vec2> uvs;
-	std::vector<glm::vec3> normals;
-
-	bool loaded = false;
-	loaded = OH.loadObject("ObjectFiles/srd.obj", vertices5, uvs, normals);
-
-	if (loaded == true)
-	{
-		std::cout << "loaded!!" << std::endl;
-	}
 	
 
 	GBuffer gBuffer;
@@ -272,7 +264,7 @@ void DRGeometryPass(GBuffer *gBuffer, double counter, Object objects[], Shader *
 	objects[10].GetPos().y = -4;
 	
 	// ------------ När vi har flera så skall detta vara inom en loop ------------
-	for (int i = 0; i < 11; i++)
+	for (int i = 0; i < 12; i++)
 	{
 		geometryPass->Update(objects[i].GetTransform(), *camera);
 		objects[i].Draw();

@@ -3,6 +3,7 @@
 
 #include <glm\glm.hpp>
 #include <glew\glew.h>
+#include <vector>
 
 class Vertex
 {
@@ -24,6 +25,7 @@ class Mesh
 {
 public:
 	Mesh(Vertex* vertices, unsigned int numOfVertices);
+	Mesh(std::vector<glm::vec3> vertices, std::vector<glm::vec2> uvCoords);
 
 	void Draw();
 
@@ -43,6 +45,8 @@ private:
 	GLuint vertexArrayObject;
 	GLuint vertexArrayBuffers[NUM_OF_BUFFERS];
 	unsigned int drawCount;
+
+	void createMesh(std::vector<glm::vec3> vertices, std::vector<glm::vec2> uvCoords);
 };
 
 #endif //MESH_H
