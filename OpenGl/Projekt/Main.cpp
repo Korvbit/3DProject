@@ -143,13 +143,13 @@ int main()
 
 	Mesh fullScreenTriangle(fullScreenVerticesTriangle, (sizeof(fullScreenVerticesTriangle) / sizeof(fullScreenVerticesTriangle[0])));
 
-	float counter = 0.0f;
+	double counter = 0.0;
 
-	// Initiate clock
-	timer_lib_initialize();
-	tick_t deltaTime, currTime, lastTime, startTime;
-	startTime = timer_current();
-	lastTime = timer_current();
+	// Initiate timer
+	double currentTime = glfwGetTime();
+	double lastTime = 0;
+	int nrOfFrames = 0;
+	double deltaTime = 0;
 
 	// Create Lights
 	PointLightHandler lights(MAX_NUMBER_OF_LIGHTS);
@@ -160,49 +160,38 @@ int main()
 	// Tell the shaders the name of the camera (GP = GeometeryPass, LP = LightPass)
 	GLuint cameraLocationGP = glGetUniformLocation(*geometryPass.getProgram(), "cameraPosGP");
 	GLuint cameraLocationLP = glGetUniformLocation(*lightPass.getProgram(), "cameraPosLP");
-
 	while(!display.IsWindowClosed())
 	{
-		// Ta reda på tiden
-		currTime = timer_current();
-		deltaTime = timer_elapsed(lastTime)*FRAMERATE;
+		deltaTime = currentTime - lastTime;
+		lastTime = glfwGetTime();
 
-		// Ser till att inte överskrida FRAMERATE
-		if (deltaTime >= 1.0f)
-		{
-			geometryPass.Bind();
-			// Kanske ska läggas in i en loop ifall vi senare har flera textures
-			texture.Bind(0);	
-			
-			sendCameraToGPU(cameraLocationGP, &camera);				
-			// Här inne sker all rotation och sånt på alla meshes
-			DRGeometryPass(&gBuffer, counter, objects, &geometryPass, &camera, &triangleTest);	
-			geometryPass.unBind();
-		
-			lightPass.Bind();
+		geometryPass.Bind();
+		// Kanske ska läggas in i en loop ifall vi senare har flera textures
+		texture.Bind(0);
 
-			lights.sendToShader();
-			sendCameraToGPU(cameraLocationLP, &camera);
-			// Här inne renderas en fullscreenTriangle och lights skickas till GPU
-			DRLightPass(&gBuffer, &fullScreenTriangle, lightPass.getProgram(), &lightPass);
-			lightPass.unBind();		
+		sendCameraToGPU(cameraLocationGP, &camera);
+		// Här inne sker all rotation och sånt på alla meshes
+		DRGeometryPass(&gBuffer, counter, objects, &geometryPass, &camera, &triangleTest);
+		geometryPass.unBind();
 
-			// Check for mouse/keyboard inputs and handle the camera movement
-			mouseControls(&display, &camera);
-			keyboardControls(&display, &camera);
+		lightPass.Bind();
 
-			camera.updateViewMatrix();
+		lights.sendToShader();
+		sendCameraToGPU(cameraLocationLP, &camera);
+		// Här inne renderas en fullscreenTriangle och lights skickas till GPU
+		DRLightPass(&gBuffer, &fullScreenTriangle, lightPass.getProgram(), &lightPass);
+		lightPass.unBind();
 
-			display.SwapBuffers(SCREENWIDTH, SCREENHEIGHT);
-			counter += 0.01f;
+		// Check for mouse/keyboard inputs and handle the camera movement
+		mouseControls(&display, &camera);
+		keyboardControls(&display, &camera);
 
-			lastTime = currTime;
-			deltaTime -= 1;	
-		}
-		else 
-		{
-			// Not time to do anything yet
-		}
+		camera.updateViewMatrix();
+
+		display.SwapBuffers(SCREENWIDTH, SCREENHEIGHT);
+
+		counter += deltaTime * 0.5;
+		currentTime = glfwGetTime();
 	}
 	return 0;
 }
