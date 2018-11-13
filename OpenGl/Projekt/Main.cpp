@@ -130,6 +130,19 @@ int main()
 	
 	Object triangleTest = OH.CreateObject(&triangleTestMesh, transformTriangleTest, &texture);
 
+	std::vector<glm::vec3> vertices5;
+	std::vector<glm::vec2> uvs;
+	std::vector<glm::vec3> normals;
+
+	bool loaded = false;
+	loaded = OH.loadObject("ObjectFiles/srd.obj", vertices5, uvs, normals);
+
+	if (loaded == true)
+	{
+		std::cout << "loaded!!" << std::endl;
+	}
+	
+
 	GBuffer gBuffer;
 	gBuffer.Init(SCREENWIDTH, SCREENHEIGHT);
 
