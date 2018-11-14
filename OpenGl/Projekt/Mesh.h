@@ -26,13 +26,13 @@ class Mesh
 public:
 	Mesh(Vertex* vertices, unsigned int numOfVertices);
 	Mesh(std::vector<glm::vec3> vertices, std::vector<glm::vec2> uvCoords);
-
+	Mesh() {}
 	void Draw();
 
 	void operator=(const Mesh& other) {}
 
 	virtual ~Mesh();
-
+	void createMesh(std::vector<glm::vec3> vertices, std::vector<glm::vec2> uvCoords);
 private:
 	enum
 	{
@@ -45,8 +45,6 @@ private:
 	GLuint vertexArrayObject;
 	GLuint vertexArrayBuffers[NUM_OF_BUFFERS];
 	unsigned int drawCount;
-
-	void createMesh(std::vector<glm::vec3> vertices, std::vector<glm::vec2> uvCoords);
 };
 
 #endif //MESH_H

@@ -10,7 +10,7 @@ Object ObjectHandler::CreateObject(Mesh *mesh, Transform transform, Texture *tex
 	return Object(mesh, transform, texture, this->numberOfObjects++);
 }
 
-Object ObjectHandler::CreateObject(const char* filePath, Transform transform, Texture *texture)
+Object ObjectHandler::CreateObject(const char* filePath, Mesh *mesh, Transform transform, Texture *texture)
 {
 	vector<glm::vec3> vertices;
 	vector<glm::vec2> uvCoords;
@@ -28,9 +28,9 @@ Object ObjectHandler::CreateObject(const char* filePath, Transform transform, Te
 		std::cout << "It went to fralleballes balls!" << std::endl;
 	}
 
-	Mesh mesh(vertices, uvCoords);
+	mesh->createMesh(vertices, uvCoords);
 
-	return Object(&mesh, transform, texture, this->numberOfObjects++);
+	return Object(mesh, transform, texture, this->numberOfObjects++);
 }
 
 bool ObjectHandler::loadObject(const char * objectPath, vector<glm::vec3>& vertices, vector<glm::vec2>& uvs, vector<glm::vec3>& normals)

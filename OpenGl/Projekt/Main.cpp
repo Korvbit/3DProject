@@ -14,7 +14,7 @@
 // Finns en main funktion i GLEW, därmed måste vi undefinera den innan vi kan använda våran main
 #undef main
 
-#define FRAMERATE 60
+#define PI 3.1415926535
 
 int SCREENWIDTH = 800;
 int SCREENHEIGHT = 600;
@@ -116,8 +116,12 @@ int main()
 
 	Mesh triangleTestMesh(verticesTriangleTest, sizeof(verticesTriangleTest) / sizeof(verticesTriangleTest[0]));
 	Transform transformTriangleTest;
-	
+
 	ObjectHandler OH = ObjectHandler();
+
+
+
+	Mesh meshOBJ;
 	Object objects[12];
 	for (int i = 0; i < 12; i++)
 	{
@@ -128,7 +132,7 @@ int main()
 		}
 		if (i == 11)
 		{
-			objects[i] = OH.CreateObject("ObjectFiles/srd.obj", transform, &texture);
+			objects[i] = OH.CreateObject("ObjectFiles/srd.obj",&meshOBJ, transform, &texture);
 		}
 	}
 	
@@ -259,7 +263,7 @@ void DRGeometryPass(GBuffer *gBuffer, double counter, Object objects[], Shader *
 		}
 	}
 	// Plane
-	objects[10].GetRot().x = 1.5;
+	objects[10].GetRot().x = PI/2;
 	objects[10].GetScale() = glm::vec3(10.0f, 10.0f, 1.0f);
 	objects[10].GetPos().y = -4;
 	
