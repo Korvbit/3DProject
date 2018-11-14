@@ -20,7 +20,7 @@ int SCREENWIDTH = 800;
 int SCREENHEIGHT = 600;
 
 // Deferred Rendering Functions
-void DRGeometryPass(GBuffer *gBuffer, double counter, Object objects[], Shader *geometryPass, Camera *camera, Object *triangleTest);
+void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Camera *camera, ObjectHandler *OH);
 void DRLightPass(GBuffer *gBuffer, Mesh *fullScreenQuad, GLuint *program, Shader *geometryPass);
 
 void sendCameraToGPU(GLuint cameraLocation, Camera *camera);
@@ -45,98 +45,30 @@ int main()
 	
 	Camera camera(glm::vec3(0, 0, -6), 70.0f,(float)SCREENWIDTH / (float)SCREENHEIGHT, 0.01f, 1000.0f);
 	
-	Vertex verticesTriangleTest[] =
-	{	
-		Vertex(glm::vec3(-0.5, -0.5, 0), glm::vec2(0.0,0.0)),
-		Vertex(glm::vec3(0, 0.5, 0), glm::vec2(0.5,1.0)),
-		Vertex(glm::vec3(0.5, -0.5, 0), glm::vec2(1.0,0.0))
-	};
 
-	Vertex verticesPlane[] =
-	{
-		Vertex(glm::vec3(-1.0f, -1.0f, 0), glm::vec2(0.0f,  0.0f)), // bottom-left
-		Vertex(glm::vec3(1.0f,  1.0f, 0), glm::vec2(0.5f,  1.0f)), // top-right
-		Vertex(glm::vec3(1.0f, -1.0f, 0), glm::vec2(1.0f,  0.0f)), // bottom-right         
-		Vertex(glm::vec3(1.0f,  1.0f, 0), glm::vec2(0.0f,  0.0f)), // top-right
-		Vertex(glm::vec3(-1.0f, -1.0f, 0), glm::vec2(0.5f,  1.0f)), // bottom-left
-		Vertex(glm::vec3(-1.0f,  1.0f, 0), glm::vec2(1.0f,  0.0f)), // top-left
-	};
-	
-	Mesh planeMesh(verticesPlane, sizeof(verticesPlane) / sizeof(verticesPlane[0]));
 
-	Vertex vertices[] = {
-		// back face
-		Vertex(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec2(0.0f,  0.0f)), // bottom-left
-		Vertex(glm::vec3(1.0f,  1.0f, -1.0f), glm::vec2(0.5f,  1.0f)), // top-right
-		Vertex(glm::vec3(1.0f, -1.0f, -1.0f), glm::vec2(1.0f,  0.0f)), // bottom-right         
-		Vertex(glm::vec3(1.0f,  1.0f, -1.0f), glm::vec2(0.0f,  0.0f)), // top-right
-		Vertex(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec2(0.5f,  1.0f)), // bottom-left
-		Vertex(glm::vec3(-1.0f,  1.0f, -1.0f), glm::vec2(1.0f,  0.0f)), // top-left
-		// front face
-		Vertex(glm::vec3(-1.0f, -1.0f,  1.0f), glm::vec2(0.0f,  0.0f)), // bottom-left
-		Vertex(glm::vec3(1.0f, -1.0f,  1.0f), glm::vec2(0.5f,  1.0f)), // bottom-right
-		Vertex(glm::vec3(1.0f,  1.0f,  1.0f), glm::vec2(1.0f,  0.0f)), // top-right
-		Vertex(glm::vec3(1.0f,  1.0f,  1.0f), glm::vec2(0.0f,  0.0f)), // top-right
-		Vertex(glm::vec3(-1.0f,  1.0f,  1.0f), glm::vec2(0.5f,  1.0f)), // top-left
-		Vertex(glm::vec3(-1.0f, -1.0f,  1.0f), glm::vec2(1.0f,  0.0f)), // bottom-left
-		// left face
-		Vertex(glm::vec3(-1.0f,  1.0f,  1.0f), glm::vec2(0.0f,  0.0f)),  // top-right
-		Vertex(glm::vec3(-1.0f,  1.0f, -1.0f), glm::vec2(0.5f,  1.0f)),  // top-left
-		Vertex(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec2(1.0f,  0.0f)),  // bottom-left
-		Vertex(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec2(0.0f,  0.0f)),  // bottom-left
-		Vertex(glm::vec3(-1.0f, -1.0f,  1.0f), glm::vec2(0.5f,  1.0f)),  // bottom-right
-		Vertex(glm::vec3(-1.0f,  1.0f,  1.0f), glm::vec2(1.0f,  0.0f)),  // top-right
-		// right face
-		Vertex(glm::vec3(1.0f,  1.0f,  1.0f), glm::vec2(0.0f,  0.0f)),  // top-left
-		Vertex(glm::vec3(1.0f, -1.0f, -1.0f), glm::vec2(0.5f,  1.0f)),  // bottom-right
-		Vertex(glm::vec3(1.0f,  1.0f, -1.0f), glm::vec2(1.0f,  0.0f)),  // top-right         
-		Vertex(glm::vec3(1.0f, -1.0f, -1.0f), glm::vec2(0.0f,  0.0f)),  // bottom-right
-		Vertex(glm::vec3(1.0f,  1.0f,  1.0f), glm::vec2(0.5f,  1.0f)),  // top-left
-		Vertex(glm::vec3(1.0f, -1.0f,  1.0f), glm::vec2(1.0f,  0.0f)),  // bottom-left     
-		// bottom face
-		Vertex(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec2(0.0f,  0.0f)),  // top-right
-		Vertex(glm::vec3(1.0f, -1.0f, -1.0f), glm::vec2(0.5f,  1.0f)),  // top-left
-		Vertex(glm::vec3(1.0f, -1.0f,  1.0f), glm::vec2(1.0f,  0.0f)),  // bottom-left
-		Vertex(glm::vec3(1.0f, -1.0f,  1.0f), glm::vec2(0.0f,  0.0f)),  // bottom-left
-		Vertex(glm::vec3(-1.0f, -1.0f,  1.0f), glm::vec2(0.5f,  1.0f)),  // bottom-right
-		Vertex(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec2(1.0f,  0.0f)),  // top-right
-		// top face
-		Vertex(glm::vec3(-1.0f,  1.0f, -1.0f), glm::vec2(0.0f,  0.0f)),  // top-left
-		Vertex(glm::vec3(1.0f,  1.0f , 1.0f), glm::vec2(0.5f,  1.0f)),  // bottom-right
-		Vertex(glm::vec3(1.0f,  1.0f, -1.0f), glm::vec2(1.0f,  0.0f)),  // top-right     
-		Vertex(glm::vec3(1.0f,  1.0f,  1.0f), glm::vec2(0.0f,  0.0f)),  // bottom-right
-		Vertex(glm::vec3(-1.0f,  1.0f, -1.0f), glm::vec2(0.5f,  1.0f)),  // top-left
-		Vertex(glm::vec3(-1.0f,  1.0f,  1.0f), glm::vec2(1.0f,  0.0f))  // bottom-left        
-	};
 
-	// Ett Object med mesh, transform och texture
-	Mesh mesh(vertices, sizeof(vertices) / sizeof(vertices[0]));
+	//=========================== Creating Objects ====================================//
+
 	Transform transform;
-	Texture texture("Textures/basicSnow.jpg");
-
-	Mesh triangleTestMesh(verticesTriangleTest, sizeof(verticesTriangleTest) / sizeof(verticesTriangleTest[0]));
-	Transform transformTriangleTest;
+	Texture snowTexture("Textures/swordTexture.png");
+	//Texture swordTexture("Textures/swordTexture.jpg");
 
 	ObjectHandler OH = ObjectHandler();
 
+	Mesh cubeMesh;
+	Mesh swordMesh;
+	Mesh groundMesh;
 
-
-	Mesh meshOBJ;
-	Object objects[12];
-	for (int i = 0; i < 12; i++)
+	int cubes[2];
+	for (int i = 0; i < 2; i++)
 	{
-		objects[i] = OH.CreateObject(&mesh, transform, &texture);
-		if (i == 10)
-		{
-			objects[i] = OH.CreateObject(&planeMesh, transform, &texture);
-		}
-		if (i == 11)
-		{
-			objects[i] = OH.CreateObject("ObjectFiles/srd.obj",&meshOBJ, transform, &texture);
-		}
+		cubes[i] = OH.CreateObject("ObjectFiles/cube.obj", &cubeMesh, transform, &snowTexture);
 	}
+	int sword = OH.CreateObject("ObjectFiles/srd.obj", &swordMesh, transform, &snowTexture);
+	int ground = OH.CreateObject("ObjectFiles/SnowTerrain.obj", &groundMesh, transform, &snowTexture);
+
 	
-	Object triangleTest = OH.CreateObject(&triangleTestMesh, transformTriangleTest, &texture);
 	
 
 	GBuffer gBuffer;
@@ -176,11 +108,12 @@ int main()
 
 		geometryPass.Bind();
 		// Kanske ska läggas in i en loop ifall vi senare har flera textures
-		texture.Bind(0);
+		snowTexture.Bind(0);
+		//swordTexture.Bind(1);
 
 		sendCameraToGPU(cameraLocationGP, &camera);
 		// Här inne sker all rotation och sånt på alla meshes
-		DRGeometryPass(&gBuffer, counter, objects, &geometryPass, &camera, &triangleTest);
+		DRGeometryPass(&gBuffer, counter, &geometryPass, &camera, &OH);
 		geometryPass.unBind();
 
 		lightPass.Bind();
@@ -205,8 +138,18 @@ int main()
 	return 0;
 }
 
-void DRGeometryPass(GBuffer *gBuffer, double counter, Object objects[], Shader *geometryPass, Camera *camera, Object *triangleTest)
+void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Camera *camera, ObjectHandler *OH)
 {
+	enum objectIndices
+	{
+		cube1,
+		cube2,
+		sword,
+		ground,
+		nrOfIndices
+	};
+
+
 	gBuffer->BindForWriting();
 
 	glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
@@ -216,67 +159,29 @@ void DRGeometryPass(GBuffer *gBuffer, double counter, Object objects[], Shader *
 	glEnable(GL_DEPTH_TEST);
 
 	// Initial positions for all cubes
-	glm::vec3 cubePositions[10] =
+	glm::vec3 cubePositions[2] =
 	{
-		glm::vec3(1.0f,  1.0f,  1.0f),
-		glm::vec3(5.0f,  3.0f, -6.0f),
-		glm::vec3(-2.5f, -3.2f, -3.5f),
-		glm::vec3(-4.8f, -3.0f, -2.3f),
-		glm::vec3(5.0f, -1.4f, -4.5f),
-		glm::vec3(-2.7f,  3.0f, -5.5f),
-		glm::vec3(2.3f, -3.0f, -6.5f),
-		glm::vec3(2.5f,  -5.0f, -4.5f),
-		glm::vec3(2.5f,  1.2f, -2.5f),
-		glm::vec3(-2.3f,  2.0f, -2.5f)
+		glm::vec3(-5.0f, 3.0f, 0.0f),
+		glm::vec3(5.0f, 3.0f, 0.0f)
 	};
 
-	// Cube transformations
-	for (int i = 0; i < 10; i++)
-	{
-		objects[i].GetPos() = cubePositions[i];
-		objects[i].GetScale() = glm::vec3(0.6f, 0.6f, 0.6f);
-
-		// Cube movement
-		if (i < 5)
-		{
-			objects[i].GetPos().x = sinf(counter*2.3f);
-		}
-		else
-		{
-			objects[i].GetPos().y = sinf(counter);
-		}
-
-		// Rotation
-		if (i < 3)
-		{
-			objects[i].GetRot().x = sinf(counter);
-		}
-		else if (i > 3 && i < 7)
-		{
-			objects[i].GetRot().y = sinf(counter);
-			objects[i].GetRot().z = sinf(counter);
-		}
-		else
-		{
-			objects[i].GetRot().x = sinf(counter);
-			objects[i].GetRot().y = sinf(counter);
-		}
-	}
-	// Plane
-	objects[10].GetRot().x = PI/2;
-	objects[10].GetScale() = glm::vec3(10.0f, 10.0f, 1.0f);
-	objects[10].GetPos().y = -4;
+	// Transformations
 	
-	// ------------ När vi har flera så skall detta vara inom en loop ------------
-	for (int i = 0; i < 12; i++)
+	OH->getObject(cube1)->GetPos() = cubePositions[cube1];
+	OH->getObject(cube2)->GetPos() = cubePositions[cube2];
+	OH->getObject(sword)->GetPos() = glm::vec3(0.0f, 10.0f, 0.0f);
+	OH->getObject(ground)->GetPos() = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	OH->getObject(sword)->GetRot().x = -(PI / 2);
+
+
+	// Update and Draw all objects
+	for (int i = 0; i < OH->getNrOfObjects(); i++)
 	{
-		geometryPass->Update(objects[i].GetTransform(), *camera);
-		objects[i].Draw();
+		geometryPass->Update(OH->getObject(i)->GetTransform(), *camera);
+		OH->getObject(i)->Draw();
 	}
-	
-	geometryPass->Update(triangleTest->GetTransform(), *camera);
-	triangleTest->Draw();
-	// ----------------------------------------------------------------------------
+
 	glDisable(GL_DEPTH_TEST);
 }
 

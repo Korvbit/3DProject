@@ -5,12 +5,14 @@ ObjectHandler::ObjectHandler()
 	this->numberOfObjects = 0;
 }
 
-Object ObjectHandler::CreateObject(Mesh *mesh, Transform transform, Texture *texture)
+int ObjectHandler::CreateObject(Mesh *mesh, Transform transform, Texture *texture)
 {
-	return Object(mesh, transform, texture, this->numberOfObjects++);
+	this->allObjects[this->numberOfObjects] = Object(mesh, transform, texture, this->numberOfObjects);
+
+	return this->numberOfObjects++;
 }
 
-Object ObjectHandler::CreateObject(const char* filePath, Mesh *mesh, Transform transform, Texture *texture)
+int ObjectHandler::CreateObject(const char* filePath, Mesh *mesh, Transform transform, Texture *texture)
 {
 	vector<glm::vec3> vertices;
 	vector<glm::vec2> uvCoords;
@@ -25,12 +27,14 @@ Object ObjectHandler::CreateObject(const char* filePath, Mesh *mesh, Transform t
 	}
 	else
 	{
-		std::cout << "It went to fralleballes balls!" << std::endl;
+		std::cout << "Bad things happened during the attempt to load the object!" << std::endl;
 	}
 
 	mesh->createMesh(vertices, uvCoords);
 
-	return Object(mesh, transform, texture, this->numberOfObjects++);
+	this->allObjects[this->numberOfObjects] = Object(mesh, transform, texture, this->numberOfObjects);
+
+	return this->numberOfObjects++;
 }
 
 bool ObjectHandler::loadObject(const char * objectPath, vector<glm::vec3>& vertices, vector<glm::vec2>& uvs, vector<glm::vec3>& normals)
@@ -97,11 +101,11 @@ bool ObjectHandler::loadObject(const char * objectPath, vector<glm::vec3>& verti
 										&vertexIndex[0], &uvIndex[0], &normalIndex[0],
 										&vertexIndex[1], &uvIndex[1], &normalIndex[1],
 										&vertexIndex[2], &uvIndex[2], &normalIndex[2]);
-					// Check if we're dealing with a hard af object file
+					
 					if (nrOfIndices != 9)
 					{
-						// Our object loader is to simple to be able to deal with an obj file like this
-						std::cout << "[ERROR] To complicated obj file!!" << std::endl;
+						// Our object loader is too simple to be able to deal with an obj file like this
+						std::cout << "[ERROR] Wrong file format!" << std::endl;
 						objectLoaded = false;
 						break;
 					}
@@ -146,4 +150,14 @@ bool ObjectHandler::loadObject(const char * objectPath, vector<glm::vec3>& verti
 		}
 	}
 	return objectLoaded;
+}
+
+unsigned int ObjectHandler::getNrOfObjects()
+{
+	return this->numberOfObjects;
+}
+
+Object* ObjectHandler::getObject(int index)
+{
+	return &this->allObjects[index];
 }

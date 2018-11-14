@@ -1,14 +1,8 @@
 ﻿  Main.cpp
-c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(242): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(246): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(252): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(256): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(257): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(261): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(262): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(266): warning C4305: '=': truncation from 'double' to 'T'
+d:\projekt\3d projekt i opengl\3dproject\opengl\projekt\main.cpp(175): warning C4305: '=': truncation from 'double' to 'T'
           with
           [
               T=float
           ]
-  Projekt.vcxproj -> C:\Users\joaki\Dropbox\Joakim\BTH\Term HT-2017\3D-prog\3D Projekt\3DProject\OpenGl\Projekt\Debug\Projekt.exe
+d:\projekt\3d projekt i opengl\3dproject\opengl\projekt\main.cpp(179): warning C4018: '<': signed/unsigned mismatch
+  Projekt.vcxproj -> D:\Projekt\3D Projekt i OpenGL\3DProject\OpenGl\Projekt\Debug\Projekt.exe
