@@ -4,7 +4,7 @@
 
 * Back-face Culling (w. G-Shader) *DONE
 
-* Parsing and rendering an existing model format
+* Parsing and rendering an existing model format *DONE
 
 *  Particle system
 
