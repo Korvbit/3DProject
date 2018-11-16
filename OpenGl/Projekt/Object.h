@@ -23,6 +23,7 @@ public:
 
 	void Draw();
 
+	void bindTexture();
 
 private:
 	Mesh *mesh;

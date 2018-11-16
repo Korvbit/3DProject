@@ -41,3 +41,8 @@ void Object::Draw()
 {
 	this->mesh->Draw();
 }
+
+void Object::bindTexture()
+{
+	this->texture->Bind(0);
+}

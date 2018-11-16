@@ -8,12 +8,11 @@ out vec3 WorldPosOut;
 out vec3 TextureRGBOut;
 out vec3 WorldNormalOut;
 
-uniform sampler2D diffuse;
-//uniform vec3 cameraPos;
+uniform sampler2D textureUnit;
 void main()
 {	
 	// Deferred rendering Geometry pass
 	WorldPosOut = posWorld1.xyz;
-	TextureRGBOut = texture2D(diffuse,texCoords).xyz;
+	TextureRGBOut = texture2D(textureUnit,texCoords).xyz;
 	WorldNormalOut = normalize(normalWorld1).xyz;
 }

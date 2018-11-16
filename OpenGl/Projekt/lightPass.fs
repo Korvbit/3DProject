@@ -31,7 +31,7 @@ void main()
 	float distancePixelToLight;
 
 	// Ambient
-	vec4 ambient = vec4(0.1f,0.1f,0.1f,1.0f) * vec4(materialColor.rgb, 1.0f);
+	vec4 ambient = vec4(0.45f,0.45f,0.45f,1.0f) * vec4(materialColor.rgb, 1.0f);
 	
 	// Diffuse
 	vec3 lightDir;

@@ -8,12 +8,15 @@ class Texture
 {
 public:
 	Texture(const std::string& fileName);
+	Texture(const Texture& other);	// Copy constructor
+	void operator=(const Texture& other);
+	Texture() {}
 
 	void Bind(unsigned int unit);
 	virtual ~Texture();
 private:
-	Texture(const Texture& other) {}
-	void operator=(const Texture& other) {}
+	
+	
 
 	GLuint m_texture;
 };

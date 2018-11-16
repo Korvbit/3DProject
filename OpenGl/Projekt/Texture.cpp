@@ -15,6 +15,7 @@ Texture::Texture(const std::string& fileName)
 
 	// Allokerar plats för 1 texture
 	glGenTextures(1, &m_texture);
+
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -26,8 +27,17 @@ Texture::Texture(const std::string& fileName)
 	// Skickar texturen till GPU'n
 	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width, height,0,GL_RGBA,GL_UNSIGNED_BYTE, imageData);
 
-
 	stbi_image_free(imageData);
+}
+
+Texture::Texture(const Texture & other)
+{
+	this->m_texture = other.m_texture;
+}
+
+void Texture::operator=(const Texture & other)
+{
+	this->m_texture = other.m_texture;
 }
 
 Texture::~Texture()
@@ -37,8 +47,13 @@ Texture::~Texture()
 
 void Texture::Bind(unsigned int unit)
 {
-	assert(unit >= 0 && unit <= 31);
-
-	glActiveTexture(GL_TEXTURE0 + unit);
-	glBindTexture(GL_TEXTURE_2D, m_texture);
+	if (unit >= 0 && unit <= 31)
+	{
+		glActiveTexture(GL_TEXTURE0 + unit);
+		glBindTexture(GL_TEXTURE_2D, m_texture);
+	}
+	else
+	{
+		std::cout << "[ERROR] Texture could not be bound. Unit not in range[0-31]" << std::endl;
+	}
 }

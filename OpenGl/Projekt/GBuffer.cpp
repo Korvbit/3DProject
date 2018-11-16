@@ -87,9 +87,6 @@ void GBuffer::BindForWriting()
 	// Anledningen till att vi ska ha denna istället är för att vi specificerar vad vi ska göra med FBO:n.
 	// Eftersom att vi ska skriva till den så är de onödigt att enabla både skriv/läs som händer i den andra.
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo);
-
-
-	//glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 }
 
 void GBuffer::BindForReading()

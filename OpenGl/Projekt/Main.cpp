@@ -20,7 +20,7 @@ int SCREENWIDTH = 800;
 int SCREENHEIGHT = 600;
 
 // Deferred Rendering Functions
-void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Camera *camera, ObjectHandler *OH);
+void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Camera *camera, ObjectHandler *OH, Texture* snowTexture, Texture* swordTexture);
 void DRLightPass(GBuffer *gBuffer, Mesh *fullScreenQuad, GLuint *program, Shader *geometryPass);
 
 void sendCameraToGPU(GLuint cameraLocation, Camera *camera);
@@ -43,7 +43,7 @@ int main()
 	geometryPass.initiateShaders();
 	lightPass.initiateShaders();
 	
-	Camera camera(glm::vec3(0, 0, -6), 70.0f,(float)SCREENWIDTH / (float)SCREENHEIGHT, 0.01f, 1000.0f);
+	Camera camera(glm::vec3(0, 3, -6), 70.0f,(float)SCREENWIDTH / (float)SCREENHEIGHT, 0.01f, 1000.0f);
 	
 
 
@@ -51,8 +51,8 @@ int main()
 	//=========================== Creating Objects ====================================//
 
 	Transform transform;
-	Texture snowTexture("Textures/swordTexture.png");
-	//Texture swordTexture("Textures/swordTexture.jpg");
+	Texture swordTexture("Textures/swordTexture.jpg");
+	Texture snowTexture("Textures/basicSnow.jpg");
 
 	ObjectHandler OH = ObjectHandler();
 
@@ -65,11 +65,8 @@ int main()
 	{
 		cubes[i] = OH.CreateObject("ObjectFiles/cube.obj", &cubeMesh, transform, &snowTexture);
 	}
-	int sword = OH.CreateObject("ObjectFiles/srd.obj", &swordMesh, transform, &snowTexture);
+	int sword = OH.CreateObject("ObjectFiles/srd.obj", &swordMesh, transform, &swordTexture);
 	int ground = OH.CreateObject("ObjectFiles/SnowTerrain.obj", &groundMesh, transform, &snowTexture);
-
-	
-	
 
 	GBuffer gBuffer;
 	gBuffer.Init(SCREENWIDTH, SCREENHEIGHT);
@@ -94,8 +91,8 @@ int main()
 
 	// Create Lights
 	PointLightHandler lights(MAX_NUMBER_OF_LIGHTS);
-	lights.setLight(0, glm::vec3(-3.0f, -1.0f, -10.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-	lights.setLight(1, glm::vec3(5.0f, 0.0f, -5.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+	lights.setLight(0, glm::vec3(-3.0f, 5.0f, -5.0f), glm::vec3(1.0f, 0.5f, 1.0f));
+	lights.setLight(1, glm::vec3(5.0f, 5.0f, -5.0f), glm::vec3(1.0f, 0.5f, 1.0f));
 	lights.initiateLights(lightPass.getProgram());
 	
 	// Tell the shaders the name of the camera (GP = GeometeryPass, LP = LightPass)
@@ -107,13 +104,10 @@ int main()
 		lastTime = glfwGetTime();
 
 		geometryPass.Bind();
-		// Kanske ska läggas in i en loop ifall vi senare har flera textures
-		snowTexture.Bind(0);
-		//swordTexture.Bind(1);
 
 		sendCameraToGPU(cameraLocationGP, &camera);
 		// Här inne sker all rotation och sånt på alla meshes
-		DRGeometryPass(&gBuffer, counter, &geometryPass, &camera, &OH);
+		DRGeometryPass(&gBuffer, counter, &geometryPass, &camera, &OH, &snowTexture, &swordTexture);
 		geometryPass.unBind();
 
 		lightPass.Bind();
@@ -138,7 +132,7 @@ int main()
 	return 0;
 }
 
-void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Camera *camera, ObjectHandler *OH)
+void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Camera *camera, ObjectHandler *OH, Texture *snowTexture, Texture *swordTexture)
 {
 	enum objectIndices
 	{
@@ -148,7 +142,6 @@ void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Came
 		ground,
 		nrOfIndices
 	};
-
 
 	gBuffer->BindForWriting();
 
@@ -162,23 +155,24 @@ void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Came
 	glm::vec3 cubePositions[2] =
 	{
 		glm::vec3(-5.0f, 3.0f, 0.0f),
-		glm::vec3(5.0f, 3.0f, 0.0f)
+		glm::vec3(10.0f, 7.0f, 0.0f)
 	};
 
 	// Transformations
 	
 	OH->getObject(cube1)->GetPos() = cubePositions[cube1];
 	OH->getObject(cube2)->GetPos() = cubePositions[cube2];
-	OH->getObject(sword)->GetPos() = glm::vec3(0.0f, 10.0f, 0.0f);
+	OH->getObject(sword)->GetPos() = glm::vec3(0.0f, 15.0f, 0.0f);
 	OH->getObject(ground)->GetPos() = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	OH->getObject(sword)->GetRot().x = -(PI / 2);
-
-
+	OH->getObject(sword)->GetRot().z = (PI/16);
+	
 	// Update and Draw all objects
 	for (int i = 0; i < OH->getNrOfObjects(); i++)
 	{
 		geometryPass->Update(OH->getObject(i)->GetTransform(), *camera);
+		OH->getObject(i)->bindTexture();
 		OH->getObject(i)->Draw();
 	}
 
@@ -198,16 +192,6 @@ void DRLightPass(GBuffer *gBuffer, Mesh *fullScreenTriangle, GLuint *program, Sh
 	lightPass->sendGBufferVariablesToGPU("gNormal", GBuffer::GBUFFER_TEXTURE_TYPE_NORMAL);
 	
 	fullScreenTriangle->Draw();
-}
-
-void InitiateLightPass(GBuffer *gbuffer)
-{
-	glEnable(GL_BLEND);
-	glBlendEquation(GL_FUNC_ADD);
-	glBlendFunc(GL_ONE, GL_ONE);
-
-	gbuffer->BindForReading();
-	glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void sendCameraToGPU(GLuint cameraLocation, Camera *camera)
