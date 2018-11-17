@@ -60,6 +60,9 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Class cpp.Files</Filter>
     </ClCompile>
+    <ClCompile Include="Particle.cpp">
+      <Filter>Class cpp.Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Display.h">
@@ -96,6 +99,9 @@
       <Filter>Class h.Files</Filter>
     </ClInclude>
     <ClInclude Include="PointLight.h">
+      <Filter>Class h.Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Particle.h">
       <Filter>Class h.Files</Filter>
     </ClInclude>
   </ItemGroup>

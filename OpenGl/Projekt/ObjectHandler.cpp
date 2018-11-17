@@ -85,6 +85,8 @@ bool ObjectHandler::loadObject(const char * objectPath, vector<glm::vec3>& verti
 				{
 					glm::vec2 uv;
 					fscanf(file, "%f %f\n", &uv.x, &uv.y);
+
+					uv.y = 1 - uv.y;
 					temp_uvs.push_back(uv);
 				}
 				else if (strcmp(firstWordOfLine, "vn") == 0)
