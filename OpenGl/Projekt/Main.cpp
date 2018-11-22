@@ -11,6 +11,8 @@
 #include "timer.h"
 #include "GBuffer.h"
 #include "PointLight.h"
+#include "Particle.h"
+#include <stdio.h>
 // Finns en main funktion i GLEW, därmed måste vi undefinera den innan vi kan använda våran main
 #undef main
 
@@ -22,8 +24,9 @@ int SCREENHEIGHT = 600;
 // Deferred Rendering Functions
 void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Camera *camera, ObjectHandler *OH, Texture* snowTexture, Texture* swordTexture);
 void DRLightPass(GBuffer *gBuffer, Mesh *fullScreenQuad, GLuint *program, Shader *geometryPass);
+void particlePass(Particle * particle, Camera * camera, Shader * particleShader, float deltaTime);
 
-void sendCameraToGPU(GLuint cameraLocation, Camera *camera);
+void sendCameraLocationToGPU(GLuint cameraLocation, Camera *camera);
 void keyboardControls(Display *display, Camera *camera);
 void mouseControls(Display *display, Camera *camera);
 
@@ -40,8 +43,14 @@ int main()
 	lightPass.CreateShader(".\\lightPass.vs", GL_VERTEX_SHADER);
 	lightPass.CreateShader(".\\lightPass.fs", GL_FRAGMENT_SHADER);
 
+	Shader particleShader;
+	particleShader.CreateShader(".\\particleShader.vs", GL_VERTEX_SHADER);
+	particleShader.CreateShader(".\\particleShader.fs", GL_FRAGMENT_SHADER);
+
+
 	geometryPass.initiateShaders();
 	lightPass.initiateShaders();
+	particleShader.initiateShaders();
 	
 	Camera camera(glm::vec3(0, 3, -6), 70.0f,(float)SCREENWIDTH / (float)SCREENHEIGHT, 0.01f, 1000.0f);
 	
@@ -67,6 +76,7 @@ int main()
 	}
 	int sword = OH.CreateObject("ObjectFiles/srd.obj", &swordMesh, transform, &swordTexture);
 	int ground = OH.CreateObject("ObjectFiles/SnowTerrain.obj", &groundMesh, transform, &snowTexture);
+	//=================================================================================//
 
 	GBuffer gBuffer;
 	gBuffer.Init(SCREENWIDTH, SCREENHEIGHT);
@@ -86,37 +96,42 @@ int main()
 	// Initiate timer
 	double currentTime = glfwGetTime();
 	double lastTime = 0;
-	int nrOfFrames = 0;
 	double deltaTime = 0;
 
 	// Create Lights
 	PointLightHandler lights(MAX_NUMBER_OF_LIGHTS);
-	lights.setLight(0, glm::vec3(-3.0f, 5.0f, -5.0f), glm::vec3(1.0f, 0.5f, 1.0f));
+	lights.setLight(0, glm::vec3(10.0f, 7.0f, -3.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 	lights.setLight(1, glm::vec3(5.0f, 5.0f, -5.0f), glm::vec3(1.0f, 0.5f, 1.0f));
 	lights.initiateLights(lightPass.getProgram());
+
+	Particle particle;
 	
 	// Tell the shaders the name of the camera (GP = GeometeryPass, LP = LightPass)
 	GLuint cameraLocationGP = glGetUniformLocation(*geometryPass.getProgram(), "cameraPosGP");
 	GLuint cameraLocationLP = glGetUniformLocation(*lightPass.getProgram(), "cameraPosLP");
+
 	while(!display.IsWindowClosed())
 	{
 		deltaTime = currentTime - lastTime;
 		lastTime = glfwGetTime();
-
+		
 		geometryPass.Bind();
 
-		sendCameraToGPU(cameraLocationGP, &camera);
-		// Här inne sker all rotation och sånt på alla meshes
+		sendCameraLocationToGPU(cameraLocationGP, &camera);
+		// Here all the objets gets transformed, and then sent to the GPU with a draw call
 		DRGeometryPass(&gBuffer, counter, &geometryPass, &camera, &OH, &snowTexture, &swordTexture);
 		geometryPass.unBind();
 
 		lightPass.Bind();
 
 		lights.sendToShader();
-		sendCameraToGPU(cameraLocationLP, &camera);
-		// Här inne renderas en fullscreenTriangle och lights skickas till GPU
+		sendCameraLocationToGPU(cameraLocationLP, &camera);
+		// Here the fullscreenTriangel is drawn, and lights are sent to the GPU
 		DRLightPass(&gBuffer, &fullScreenTriangle, lightPass.getProgram(), &lightPass);
 		lightPass.unBind();
+
+		// Draw particels
+		particlePass(&particle, &camera, &particleShader, deltaTime);
 
 		// Check for mouse/keyboard inputs and handle the camera movement
 		mouseControls(&display, &camera);
@@ -194,7 +209,43 @@ void DRLightPass(GBuffer *gBuffer, Mesh *fullScreenTriangle, GLuint *program, Sh
 	fullScreenTriangle->Draw();
 }
 
-void sendCameraToGPU(GLuint cameraLocation, Camera *camera)
+// This function draws particles to the screen.
+void particlePass(Particle * particle, Camera * camera, Shader * particleShader, float deltaTime)
+{
+	// We need the camera right/up vector and the camera location in world space to be able to make billboards out of the particles
+	// PS = ParticleShader
+	GLuint cameraRightWorldPS = glGetUniformLocation(*particleShader->getProgram(), "cameraRightWorldPS");
+	GLuint cameraUpWorldPS = glGetUniformLocation(*particleShader->getProgram(), "cameraUpWorldPS");
+	GLuint viewProjection = glGetUniformLocation(*particleShader->getProgram(), "viewProjectionMatrix");
+
+	// Create new particles
+	particle->generateParticles(deltaTime);
+
+	// Simulate all the particles
+	particle->simulateParticles(camera->getCameraPosition(), deltaTime);
+
+	// Update the buffers holding the particles
+	particle->update();
+
+	// Bind the correct shader
+	particleShader->Bind();
+
+	// Send Uniforms
+	glUniform3f(cameraRightWorldPS, camera->getRightVector().x, camera->getRightVector().y, camera->getRightVector().z);
+	glUniform3f(cameraUpWorldPS, camera->getUpVector().x, camera->getUpVector().y, camera->getUpVector().z);
+	glUniformMatrix4fv(viewProjection, 1, GL_FALSE, &camera->getViewProjection()[0][0]);
+
+	// Bind the buffers holding the particles
+	particle->bind();
+
+	// Draw the particles, send a draw call to the GPU
+	particle->draw();
+
+	// Unbind the shader
+	particleShader->unBind();
+}
+
+void sendCameraLocationToGPU(GLuint cameraLocation, Camera *camera)
 {
 	glUniform3f(cameraLocation, camera->getCameraPosition().x, camera->getCameraPosition().y, camera->getCameraPosition().z);
 }
@@ -203,7 +254,7 @@ void keyboardControls(Display *display, Camera *camera)
 {
 	int keyboardButton;
 	// Check for keyboard inputs, used to move the camera around.
-	// WASD for movearound, RF (Rise,Fall) and space to locate the initial camera position.
+	// WASD for movearound, RF (Rise,Fall) and space to set the initial camera position & viewDir.
 	keyboardButton = glfwGetKey(display->getWindow(), GLFW_KEY_W);
 	if (keyboardButton == GLFW_PRESS)
 	{

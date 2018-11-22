@@ -38,6 +38,16 @@ glm::vec3 Camera::getStartForwardVector()
 	return this->startForwardVector;
 }
 
+glm::vec3 Camera::getUpVector()
+{
+	return this->upVector;
+}
+
+glm::vec3 Camera::getRightVector()
+{
+	return glm::cross(this->forwardVector, this->upVector);
+}
+
 glm::vec3 Camera::getForwardVector()
 {
 	return this->forwardVector;

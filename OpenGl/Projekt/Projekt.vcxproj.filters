@@ -121,5 +121,11 @@
     <None Include="geometryPass.vs">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="particleShader.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="particleShader.fs">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

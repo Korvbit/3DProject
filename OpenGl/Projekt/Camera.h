@@ -20,6 +20,9 @@ public:
 	glm::vec3 getCameraPosition();
 	glm::vec3 getStartCameraPosition();
 	glm::vec3 getStartForwardVector();
+	glm::vec3 getUpVector();
+	glm::vec3 getRightVector();
+
 
 	void moveForward();
 	void moveBackward();
