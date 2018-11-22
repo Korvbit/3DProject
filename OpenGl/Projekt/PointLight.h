@@ -7,7 +7,7 @@
 #include <stdio.h>
 using namespace std;
 
-const int MAX_NUMBER_OF_LIGHTS = 2;
+const int MAX_NUMBER_OF_LIGHTS = 1;
 struct PointLight
 {
 	glm::vec3 position;
