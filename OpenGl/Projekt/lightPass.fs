@@ -3,7 +3,7 @@
 out vec4 fragment_color;	
 in vec2 texCoord0;
 
-const int MAX_POINT_LIGHTS = 2;    
+const int MAX_POINT_LIGHTS = 1;    
 
 struct PointLight
 {
@@ -66,6 +66,7 @@ void main()
 
 	fragment_color = vec4(finalColor.xyz, 1.0f);
 
+	//fragment_color = vec4(normal, 1.0f);
 	// Tester
 	//fragment_color = vec4(finalColor.xyz, 1.0f);
 	//fragment_color = vec4(materialColor.xyz, 1.0f);

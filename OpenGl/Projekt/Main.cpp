@@ -51,8 +51,9 @@ int main()
 	//=========================== Creating Objects ====================================//
 
 	Transform transform;
-	Texture swordTexture("Textures/swordTexture.jpg");
-	Texture snowTexture("Textures/basicSnow.jpg");
+	Texture swordTexture("Textures/swordTexture.jpg", "NormalMaps/flat_normal.jpg");
+	Texture brickTexture("Textures/brickwall.jpg", "NormalMaps/brickwall_normal.jpg");
+	Texture snowTexture("Textures/basicSnow.jpg", "NormalMaps/flat_normal.jpg");
 
 	ObjectHandler OH = ObjectHandler();
 
@@ -63,7 +64,7 @@ int main()
 	int cubes[2];
 	for (int i = 0; i < 2; i++)
 	{
-		cubes[i] = OH.CreateObject("ObjectFiles/cube.obj", &cubeMesh, transform, &snowTexture);
+		cubes[i] = OH.CreateObject("ObjectFiles/cube.obj", &cubeMesh, transform, &brickTexture);
 	}
 	int sword = OH.CreateObject("ObjectFiles/srd.obj", &swordMesh, transform, &swordTexture);
 	int ground = OH.CreateObject("ObjectFiles/SnowTerrain.obj", &groundMesh, transform, &snowTexture);
@@ -91,8 +92,8 @@ int main()
 
 	// Create Lights
 	PointLightHandler lights(MAX_NUMBER_OF_LIGHTS);
-	lights.setLight(0, glm::vec3(-3.0f, 5.0f, -5.0f), glm::vec3(1.0f, 0.5f, 1.0f));
-	lights.setLight(1, glm::vec3(5.0f, 5.0f, -5.0f), glm::vec3(1.0f, 0.5f, 1.0f));
+	lights.setLight(0, glm::vec3(10.0f, 7.0f, -3.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+	//lights.setLight(1, glm::vec3(5.0f, 5.0f, -5.0f), glm::vec3(1.0f, 0.5f, 1.0f));
 	lights.initiateLights(lightPass.getProgram());
 	
 	// Tell the shaders the name of the camera (GP = GeometeryPass, LP = LightPass)
@@ -154,7 +155,7 @@ void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Came
 	// Initial positions for all cubes
 	glm::vec3 cubePositions[2] =
 	{
-		glm::vec3(-5.0f, 3.0f, 0.0f),
+		glm::vec3(10.0f, 7.0f, -3.0f),
 		glm::vec3(10.0f, 7.0f, 0.0f)
 	};
 
