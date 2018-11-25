@@ -3,7 +3,7 @@
 out vec4 fragment_color;	
 in vec2 texCoord0;
 
-const int MAX_POINT_LIGHTS = 1;    
+const int MAX_POINT_LIGHTS = 2;    
 
 struct PointLight
 {
@@ -22,16 +22,16 @@ uniform sampler2D gNormal;
 void main()
 {
 	// Sample from the gBuffer
-	vec3 pixelPos = texture(gPosition, texCoord0).xyz;
-	vec3 materialColor = texture(gDiffuse, texCoord0).rgb;
-	vec3 normal = texture(gNormal, texCoord0).xyz;
+	vec3 pixelPos = texture2D(gPosition, texCoord0).xyz;
+	vec3 materialColor = texture2D(gDiffuse, texCoord0).rgb;
+	vec3 normal = texture2D(gNormal, texCoord0).xyz;
 
 	// Attenuation
 	float attenuation;
 	float distancePixelToLight;
 
 	// Ambient
-	vec4 ambient = vec4(0.45f,0.45f,0.45f,1.0f) * vec4(materialColor.rgb, 1.0f);
+	vec4 ambient = vec4(0.1f,0.1f,0.1f,1.0f) * vec4(materialColor.rgb, 1.0f);
 	
 	// Diffuse
 	vec3 lightDir;

@@ -27,6 +27,7 @@ void DRLightPass(GBuffer *gBuffer, Mesh *fullScreenQuad, GLuint *program, Shader
 void particlePass(Particle * particle, Camera * camera, Shader * particleShader, float deltaTime);
 
 void sendCameraLocationToGPU(GLuint cameraLocation, Camera *camera);
+void prepareTexture(GLuint textureLoc, GLuint normalMapLoc);
 void keyboardControls(Display *display, Camera *camera);
 void mouseControls(Display *display, Camera *camera);
 
@@ -52,7 +53,7 @@ int main()
 	lightPass.initiateShaders();
 	particleShader.initiateShaders();
 	
-	Camera camera(glm::vec3(0, 3, -6), 70.0f,(float)SCREENWIDTH / (float)SCREENHEIGHT, 0.01f, 1000.0f);
+	Camera camera(glm::vec3(-15, 25, -53), 70.0f,(float)SCREENWIDTH / (float)SCREENHEIGHT, 0.01f, 1000.0f);
 	
 
 
@@ -60,7 +61,7 @@ int main()
 	//=========================== Creating Objects ====================================//
 
 	Transform transform;
-	Texture swordTexture("Textures/swordTexture.jpg", "NormalMaps/flat_normal.jpg");
+	Texture swordTexture("Textures/swordTexture.jpg", "NormalMaps/sword_normal.png");
 	Texture brickTexture("Textures/brickwall.jpg", "NormalMaps/brickwall_normal.jpg");
 	Texture snowTexture("Textures/basicSnow.jpg", "NormalMaps/flat_normal.jpg");
 
@@ -101,8 +102,8 @@ int main()
 
 	// Create Lights
 	PointLightHandler lights(MAX_NUMBER_OF_LIGHTS);
-	lights.setLight(0, glm::vec3(10.0f, 7.0f, -3.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-	//lights.setLight(1, glm::vec3(5.0f, 5.0f, -5.0f), glm::vec3(1.0f, 0.5f, 1.0f));
+	lights.setLight(0, glm::vec3(10.0f, 7.0f, -3.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	lights.setLight(1, glm::vec3(-7.0f, 7.0f, -3.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	lights.initiateLights(lightPass.getProgram());
 
 	Particle particle;
@@ -110,6 +111,12 @@ int main()
 	// Tell the shaders the name of the camera (GP = GeometeryPass, LP = LightPass)
 	GLuint cameraLocationGP = glGetUniformLocation(*geometryPass.getProgram(), "cameraPosGP");
 	GLuint cameraLocationLP = glGetUniformLocation(*lightPass.getProgram(), "cameraPosLP");
+
+	GLint texLoc;
+	GLint normalTexLoc;
+
+	texLoc = glGetUniformLocation(*geometryPass.getProgram(), "texture");
+	normalTexLoc = glGetUniformLocation(*geometryPass.getProgram(), "normalMap");
 
 	while(!display.IsWindowClosed())
 	{
@@ -119,6 +126,8 @@ int main()
 		geometryPass.Bind();
 
 		sendCameraLocationToGPU(cameraLocationGP, &camera);
+		prepareTexture(texLoc, normalTexLoc);
+
 		// Here all the objets gets transformed, and then sent to the GPU with a draw call
 		DRGeometryPass(&gBuffer, counter, &geometryPass, &camera, &OH, &snowTexture, &swordTexture);
 		geometryPass.unBind();
@@ -127,6 +136,7 @@ int main()
 
 		lights.sendToShader();
 		sendCameraLocationToGPU(cameraLocationLP, &camera);
+		
 		// Here the fullscreenTriangel is drawn, and lights are sent to the GPU
 		DRLightPass(&gBuffer, &fullScreenTriangle, lightPass.getProgram(), &lightPass);
 		lightPass.unBind();
@@ -171,7 +181,7 @@ void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Came
 	glm::vec3 cubePositions[2] =
 	{
 		glm::vec3(10.0f, 7.0f, -3.0f),
-		glm::vec3(10.0f, 7.0f, 0.0f)
+		glm::vec3(-7.0f, 7.0f, -3.0f)
 	};
 
 	// Transformations
@@ -182,7 +192,7 @@ void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Came
 	OH->getObject(ground)->GetPos() = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	OH->getObject(sword)->GetRot().x = -(PI / 2);
-	OH->getObject(sword)->GetRot().z = (PI/16);
+	OH->getObject(sword)->GetRot().z = (PI / 16);
 	
 	// Update and Draw all objects
 	for (int i = 0; i < OH->getNrOfObjects(); i++)
@@ -249,6 +259,12 @@ void particlePass(Particle * particle, Camera * camera, Shader * particleShader,
 void sendCameraLocationToGPU(GLuint cameraLocation, Camera *camera)
 {
 	glUniform3f(cameraLocation, camera->getCameraPosition().x, camera->getCameraPosition().y, camera->getCameraPosition().z);
+}
+
+void prepareTexture(GLuint textureLoc, GLuint normalMapLoc)
+{
+	glUniform1i(textureLoc, 0);
+	glUniform1i(normalMapLoc, 1);
 }
 
 void keyboardControls(Display *display, Camera *camera)
