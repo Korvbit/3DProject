@@ -64,12 +64,14 @@ int main()
 	Texture swordTexture("Textures/swordTexture.jpg", "NormalMaps/sword_normal.png");
 	Texture brickTexture("Textures/brickwall.jpg", "NormalMaps/brickwall_normal.jpg");
 	Texture snowTexture("Textures/basicSnow.jpg", "NormalMaps/flat_normal.jpg");
+	Texture moonTexture("Textures/moon.png", "NormalMaps/flat_normal.jpg");
 
 	ObjectHandler OH = ObjectHandler();
 
 	Mesh cubeMesh;
 	Mesh swordMesh;
 	Mesh groundMesh;
+	Mesh moonMesh;
 
 	int cubes[2];
 	for (int i = 0; i < 2; i++)
@@ -78,6 +80,7 @@ int main()
 	}
 	int sword = OH.CreateObject("ObjectFiles/srd.obj", &swordMesh, transform, &swordTexture);
 	int ground = OH.CreateObject("ObjectFiles/SnowTerrain.obj", &groundMesh, transform, &snowTexture);
+	int moon = OH.CreateObject("ObjectFiles/moon.obj", &moonMesh, transform, &moonTexture);
 	//=================================================================================//
 
 	GBuffer gBuffer;
@@ -166,6 +169,7 @@ void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Came
 		cube2,
 		sword,
 		ground,
+		moon,
 		nrOfIndices
 	};
 
@@ -190,6 +194,7 @@ void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Came
 	OH->getObject(cube2)->GetPos() = cubePositions[cube2];
 	OH->getObject(sword)->GetPos() = glm::vec3(0.0f, 15.0f, 0.0f);
 	OH->getObject(ground)->GetPos() = glm::vec3(0.0f, 0.0f, 0.0f);
+	OH->getObject(moon)->GetPos() = glm::vec3(30.0f, 30.0f, 30.0f);
 
 	OH->getObject(sword)->GetRot().x = -(PI / 2);
 	OH->getObject(sword)->GetRot().z = (PI / 16);
