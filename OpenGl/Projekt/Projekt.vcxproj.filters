@@ -127,5 +127,11 @@
     <None Include="particleShader.fs">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="pointLightShader.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="pointLightShader.fs">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

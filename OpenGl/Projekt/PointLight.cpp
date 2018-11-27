@@ -5,10 +5,14 @@ PointLightHandler::PointLightHandler()
 	this->nrOfLights = 0;
 }
 
-void PointLightHandler::setLight(glm::vec3 position, glm::vec3 color)
+void PointLightHandler::createLight(glm::vec3 position, glm::vec3 color)
 {
-	this->pointLight[this->nrOfLights].position = position;
-	this->pointLight[this->nrOfLights].color = color;
+	vector<glm::vec3> colors;
+	for (int i = 0; i < 3; i++)
+		colors.push_back(color);
+	this->lightArray[this->nrOfLights].GetMesh().createMesh("ObjectFiles/moon.obj", colors);
+	this->lightArray[this->nrOfLights].GetPos() = position;
+	this->lightArray[this->nrOfLights].GetColor() = color;
 	this->nrOfLights++;
 }
 
@@ -17,8 +21,10 @@ void PointLightHandler::sendToShader()
 	// Send the lights
 	for (int i = 0; i < this->nrOfLights; i++)
 	{
-		glUniform3f(loc_position[i], this->pointLight[i].position.x, this->pointLight[i].position.y, this->pointLight[i].position.z);
-		glUniform3f(loc_color[i], this->pointLight[i].color.x, this->pointLight[i].color.y, this->pointLight[i].color.z);
+		glm::vec3 position = this->lightArray[i].GetPos();
+		glm::vec3 color = this->lightArray[i].GetColor();
+		glUniform3f(loc_position[i], position.x, position.y, position.z);
+		glUniform3f(loc_color[i], color.x, color.y, color.z);
 	}
 
 	// Send the nrOfLights variable
@@ -44,6 +50,39 @@ void PointLightHandler::initiateLights(GLuint *program)
 	this->loc_NrOfLights = glGetUniformLocation(*program, "NR_OF_POINT_LIGHTS");
 }
 
+void PointLightHandler::Draw()
+{
+	for (int i = 0; i < this->nrOfLights; i++)
+	{
+		lightArray[i].Draw();
+	}
+}
+
 PointLightHandler::~PointLightHandler()
 {
+}
+
+PointLight::PointLight()
+{
+
+}
+
+Mesh & PointLight::GetMesh()
+{
+	return this->mesh;
+}
+
+glm::vec3 & PointLight::GetPos()
+{
+	return this->transform.GetPos();
+}
+
+glm::vec3 & PointLight::GetColor()
+{
+	return this->color;
+}
+
+void PointLight::Draw()
+{
+	this->mesh.Draw();
 }

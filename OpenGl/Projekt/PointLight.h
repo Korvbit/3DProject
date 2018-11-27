@@ -5,33 +5,46 @@
 #include <glew\glew.h>
 #include <glm\glm.hpp>
 #include <stdio.h>
+#include "Mesh.h"
+#include "Transform.h"
+
 using namespace std;
 
 const int MAX_NUMBER_OF_LIGHTS = 256;
-struct PointLight
+
+class PointLight
 {
-	glm::vec3 position;
+private:
+	Mesh mesh;
+	Transform transform;
 	glm::vec3 color;
+public:
+	PointLight();
+	Mesh& GetMesh();
+	glm::vec3& GetPos();
+	glm::vec3& GetColor();
+	void Draw();
 };
 
 class PointLightHandler
 {
 private:
-	PointLight pointLight[MAX_NUMBER_OF_LIGHTS];
+	PointLight lightArray[MAX_NUMBER_OF_LIGHTS];
 	GLuint nrOfLights;
 
 	GLuint loc_position[MAX_NUMBER_OF_LIGHTS];
 	GLuint loc_color[MAX_NUMBER_OF_LIGHTS];
-
 	GLuint loc_NrOfLights;
 public:
 	PointLightHandler();
 
 	// location, pos, color
-	void setLight(glm::vec3 position, glm::vec3 color);
+	void createLight(glm::vec3 position, glm::vec3 color);
 
 	void sendToShader();
 	void initiateLights(GLuint *program);
+	void Draw();
+
 	virtual ~PointLightHandler();
 };
 

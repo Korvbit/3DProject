@@ -163,6 +163,8 @@
     <None Include="geometryPass.vs" />
     <None Include="particleShader.fs" />
     <None Include="particleShader.vs" />
+    <None Include="pointLightShader.fs" />
+    <None Include="pointLightShader.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

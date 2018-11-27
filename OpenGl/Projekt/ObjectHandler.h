@@ -15,7 +15,6 @@ public:
 
 	int CreateObject(Mesh *mesh, Transform transform, Texture *texture);
 	int CreateObject(const char* filePath, Mesh *mesh, Transform transform, Texture *texture);
-	bool loadObject(const char * objectPath, vector <glm::vec3> & vertices, vector <glm::vec2> & uvs, vector <glm::vec3> & normals);
 
 	unsigned int getNrOfObjects();
 	Object* getObject(int index);

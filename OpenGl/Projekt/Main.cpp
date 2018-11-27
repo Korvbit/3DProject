@@ -61,10 +61,14 @@ int main()
 	particleShader.CreateShader(".\\particleShader.vs", GL_VERTEX_SHADER);
 	particleShader.CreateShader(".\\particleShader.fs", GL_FRAGMENT_SHADER);
 
+	Shader pointLightPass;
+	pointLightPass.CreateShader(".\\pointLightShader.vs", GL_VERTEX_SHADER);
+	pointLightPass.CreateShader(".\\pointLightShader.fs", GL_FRAGMENT_SHADER);
 
 	geometryPass.initiateShaders();
 	lightPass.initiateShaders();
 	particleShader.initiateShaders();
+	pointLightPass.initiateShaders();
 	
 	Camera camera(glm::vec3(-15, 25, -53), 70.0f,(float)SCREENWIDTH / (float)SCREENHEIGHT, 0.01f, 1000.0f);
 	
@@ -121,12 +125,12 @@ int main()
 
 	// Create Lights
 	PointLightHandler lights;
-	lights.setLight(glm::vec3(10.0f, 7.0f, -3.0f), glm::vec3(1.0f, 0.0f, 1.0f));
-	lights.setLight(glm::vec3(-7.0f, 7.0f, -3.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-	lights.setLight(glm::vec3(0.0f, 7.0f, -20.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	lights.setLight(glm::vec3(4.0f, 7.0f, -10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	lights.setLight(glm::vec3(-4.0f, 7.0f, -10.0f), glm::vec3(0.0f, 1.0f, 0.5f));
-	lights.setLight(glm::vec3(0.0f, 7.0f, 6.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+	lights.createLight(glm::vec3(10.0f, 7.0f, -3.0f), glm::vec3(1.0f, 0.0f, 1.0f));
+	lights.createLight(glm::vec3(-7.0f, 7.0f, -3.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+	lights.createLight(glm::vec3(0.0f, 7.0f, -20.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	lights.createLight(glm::vec3(4.0f, 7.0f, -10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	lights.createLight(glm::vec3(-4.0f, 7.0f, -10.0f), glm::vec3(0.0f, 1.0f, 0.5f));
+	lights.createLight(glm::vec3(0.0f, 7.0f, 6.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 	
 	lights.initiateLights(lightPass.getProgram());
 
@@ -165,8 +169,13 @@ int main()
 		DRLightPass(&gBuffer, &fullScreenTriangle, lightPass.getProgram(), &lightPass);
 		lightPass.unBind();
 
-		// Draw particels
+		// Draw particles
 		particlePass(&particle, &camera, &particleShader, deltaTime);
+
+		// Draw lightbölbz
+		pointLightPass.Bind();
+		lights.Draw();
+		pointLightPass.unBind();
 
 		// Check for mouse/keyboard inputs and handle the camera movement
 		mouseControls(&display, &camera);
