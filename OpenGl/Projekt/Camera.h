@@ -48,7 +48,7 @@ private:
 	// The vector which we rotate around during the vertical camera rotation.
 	glm::vec3 rotateAround;
 	const float rotationalSpeed = 0.01f;
-	const float movementSpeed = 0.08f;
+	const float movementSpeed = 0.2f;
 
 };
 

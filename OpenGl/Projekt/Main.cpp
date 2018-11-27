@@ -18,6 +18,16 @@
 
 #define PI 3.1415926535
 
+enum objectIndices
+{
+	cube1,
+	cube2,
+	sword,
+	ground,
+	moon,
+	nrOfIndices
+};
+
 int SCREENWIDTH = 800;
 int SCREENHEIGHT = 600;
 
@@ -28,6 +38,9 @@ void particlePass(Particle * particle, Camera * camera, Shader * particleShader,
 
 void sendCameraLocationToGPU(GLuint cameraLocation, Camera *camera);
 void prepareTexture(GLuint textureLoc, GLuint normalMapLoc);
+
+void setStartPositions(ObjectHandler *OH);
+
 void keyboardControls(Display *display, Camera *camera);
 void mouseControls(Display *display, Camera *camera);
 
@@ -81,6 +94,8 @@ int main()
 	int sword = OH.CreateObject("ObjectFiles/srd.obj", &swordMesh, transform, &swordTexture);
 	int ground = OH.CreateObject("ObjectFiles/SnowTerrain.obj", &groundMesh, transform, &snowTexture);
 	int moon = OH.CreateObject("ObjectFiles/moon.obj", &moonMesh, transform, &moonTexture);
+
+	setStartPositions(&OH);
 	//=================================================================================//
 
 	GBuffer gBuffer;
@@ -103,10 +118,16 @@ int main()
 	double lastTime = 0;
 	double deltaTime = 0;
 
+
 	// Create Lights
-	PointLightHandler lights(MAX_NUMBER_OF_LIGHTS);
-	lights.setLight(0, glm::vec3(10.0f, 7.0f, -3.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	lights.setLight(1, glm::vec3(-7.0f, 7.0f, -3.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	PointLightHandler lights;
+	lights.setLight(glm::vec3(10.0f, 7.0f, -3.0f), glm::vec3(1.0f, 0.0f, 1.0f));
+	lights.setLight(glm::vec3(-7.0f, 7.0f, -3.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+	lights.setLight(glm::vec3(0.0f, 7.0f, -20.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	lights.setLight(glm::vec3(4.0f, 7.0f, -10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	lights.setLight(glm::vec3(-4.0f, 7.0f, -10.0f), glm::vec3(0.0f, 1.0f, 0.5f));
+	lights.setLight(glm::vec3(0.0f, 7.0f, 6.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+	
 	lights.initiateLights(lightPass.getProgram());
 
 	Particle particle;
@@ -153,6 +174,8 @@ int main()
 
 		camera.updateViewMatrix();
 
+		//std::cout << "x: " << camera.getCameraPosition().x << " y: " << camera.getCameraPosition().y << " z: " << camera.getCameraPosition().z << std::endl;
+
 		display.SwapBuffers(SCREENWIDTH, SCREENHEIGHT);
 
 		counter += deltaTime * 0.5;
@@ -163,16 +186,6 @@ int main()
 
 void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Camera *camera, ObjectHandler *OH, Texture *snowTexture, Texture *swordTexture)
 {
-	enum objectIndices
-	{
-		cube1,
-		cube2,
-		sword,
-		ground,
-		moon,
-		nrOfIndices
-	};
-
 	gBuffer->BindForWriting();
 
 	glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
@@ -181,23 +194,7 @@ void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Came
 	
 	glEnable(GL_DEPTH_TEST);
 
-	// Initial positions for all cubes
-	glm::vec3 cubePositions[2] =
-	{
-		glm::vec3(10.0f, 7.0f, -3.0f),
-		glm::vec3(-7.0f, 7.0f, -3.0f)
-	};
-
-	// Transformations
-	
-	OH->getObject(cube1)->GetPos() = cubePositions[cube1];
-	OH->getObject(cube2)->GetPos() = cubePositions[cube2];
-	OH->getObject(sword)->GetPos() = glm::vec3(0.0f, 15.0f, 0.0f);
-	OH->getObject(ground)->GetPos() = glm::vec3(0.0f, 0.0f, 0.0f);
-	OH->getObject(moon)->GetPos() = glm::vec3(30.0f, 30.0f, 30.0f);
-
-	OH->getObject(sword)->GetRot().x = -(PI / 2);
-	OH->getObject(sword)->GetRot().z = (PI / 16);
+	// här ska object uppdateras om de ska röras eller nått
 	
 	// Update and Draw all objects
 	for (int i = 0; i < OH->getNrOfObjects(); i++)
@@ -270,6 +267,30 @@ void prepareTexture(GLuint textureLoc, GLuint normalMapLoc)
 {
 	glUniform1i(textureLoc, 0);
 	glUniform1i(normalMapLoc, 1);
+}
+
+void setStartPositions(ObjectHandler * OH)
+{
+	// Initial positions for all cubes
+	glm::vec3 cubePositions[2] =
+	{
+		glm::vec3(10.0f, 7.0f, -3.0f),
+		glm::vec3(-7.0f, 7.0f, -3.0f)
+	};
+
+	// Transformations
+
+	OH->getObject(cube1)->GetPos() = cubePositions[cube1];
+	OH->getObject(cube2)->GetPos() = cubePositions[cube2];
+	OH->getObject(sword)->GetPos() = glm::vec3(0.0f, 15.0f, 0.0f);
+	OH->getObject(ground)->GetPos() = glm::vec3(0.0f, 0.0f, 0.0f);
+	OH->getObject(moon)->GetPos() = glm::vec3(500.0f, 500.0f, 500.0f);
+	OH->getObject(moon)->GetScale() = glm::vec3(100, 100, 100);
+
+	OH->getObject(cube1)->GetScale() = glm::vec3(4, 3, 0.01);
+
+	OH->getObject(sword)->GetRot().x = -(PI / 2);
+	OH->getObject(sword)->GetRot().z = (PI / 16);
 }
 
 void keyboardControls(Display *display, Camera *camera)

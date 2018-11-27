@@ -3,7 +3,7 @@
 out vec4 fragment_color;	
 in vec2 texCoord0;
 
-const int MAX_POINT_LIGHTS = 2;    
+ 
 
 struct PointLight
 {
@@ -11,8 +11,10 @@ struct PointLight
 	vec3 color;
 };
 
+uniform int NR_OF_POINT_LIGHTS;   
+
 uniform vec3 cameraPosLP;
-uniform PointLight PointLights[MAX_POINT_LIGHTS];
+uniform PointLight PointLights[256];
 
 // Gbuffer variables
 uniform sampler2D gPosition;
@@ -31,7 +33,7 @@ void main()
 	float distancePixelToLight;
 
 	// Ambient
-	vec4 ambient = vec4(0.1f,0.1f,0.1f,1.0f) * vec4(materialColor.rgb, 1.0f);
+	vec4 ambient = vec4(0.25f,0.25f,0.25f,1.0f) * vec4(materialColor.rgb, 1.0f);
 	
 	// Diffuse
 	vec3 lightDir;
@@ -44,22 +46,25 @@ void main()
 	vec4 specular;
 	float shininess = 30;
 
-	for(int i = 0; i < MAX_POINT_LIGHTS; i++)
+	for(int i = 0; i < NR_OF_POINT_LIGHTS; i++)
 	{
-		// Diffuse
-		lightDir = normalize(PointLights[i].position.xyz - pixelPos.xyz);
-		alpha = dot(normal.xyz,lightDir);
-		diffuse += vec4(materialColor.rgb,1.0f) * vec4(PointLights[i].color.rgb, 1.0f) * max(alpha, 0);
+		if(length(PointLights[i].position.xyz - pixelPos.xyz) < 10)
+		{
+			// Diffuse
+			lightDir = normalize(PointLights[i].position.xyz - pixelPos.xyz);
+			alpha = dot(normal.xyz,lightDir);
+			diffuse += vec4(materialColor.rgb,1.0f) * vec4(PointLights[i].color.rgb, 1.0f) * max(alpha, 0);
 
-		// Specular
-		vecToCam = normalize(vec3(cameraPosLP.xyz - pixelPos.xyz));	
-		// Source: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/reflect.xhtml
-		reflection = reflect(vec4(-lightDir.xyz, 0.0f), vec4(normal.xyz,1.0f));
-		specular += vec4(materialColor.rgb,1.0f) * vec4(PointLights[i].color.rgb, 1.0f) * pow(max(dot(reflection.xyz, vecToCam.xyz),0), shininess);
+			// Specular
+			vecToCam = normalize(vec3(cameraPosLP.xyz - pixelPos.xyz));	
+			// Source: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/reflect.xhtml
+			reflection = reflect(vec4(-lightDir.xyz, 0.0f), vec4(normal.xyz,1.0f));
+			specular += vec4(materialColor.rgb,1.0f) * vec4(PointLights[i].color.rgb, 1.0f) * pow(max(dot(reflection.xyz, vecToCam.xyz),0), shininess);
 
-		// attenuation
-		distancePixelToLight = length(PointLights[i].position - pixelPos);
-		attenuation = 1.0f / (1.0f + (0.1 * distancePixelToLight)+ (0.01 * pow(distancePixelToLight, 2)));
+			// attenuation
+			distancePixelToLight = length(PointLights[i].position - pixelPos);
+			attenuation = 1.0f / (1.0f + (0.1 * distancePixelToLight)+ (0.01 * pow(distancePixelToLight, 2)));
+		}	
 	}
 	vec4 finalColor = ambient + attenuation*(diffuse + specular);
 	finalColor = min(vec4(1.0f,1.0f,1.0f,1.0f), finalColor);

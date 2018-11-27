@@ -7,7 +7,7 @@
 #include <stdio.h>
 using namespace std;
 
-const int MAX_NUMBER_OF_LIGHTS = 2;
+const int MAX_NUMBER_OF_LIGHTS = 256;
 struct PointLight
 {
 	glm::vec3 position;
@@ -22,12 +22,13 @@ private:
 
 	GLuint loc_position[MAX_NUMBER_OF_LIGHTS];
 	GLuint loc_color[MAX_NUMBER_OF_LIGHTS];
+
+	GLuint loc_NrOfLights;
 public:
-	PointLightHandler(GLuint nrOfLights);
+	PointLightHandler();
 
 	// location, pos, color
-	void setLight(GLuint location, glm::vec3 position, glm::vec3 color);
-
+	void setLight(glm::vec3 position, glm::vec3 color);
 
 	void sendToShader();
 	void initiateLights(GLuint *program);
