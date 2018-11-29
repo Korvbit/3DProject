@@ -7,12 +7,11 @@ PointLightHandler::PointLightHandler()
 
 void PointLightHandler::createLight(glm::vec3 position, glm::vec3 color)
 {
-	vector<glm::vec3> colors;
-	for (int i = 0; i < 3; i++)
-		colors.push_back(color);
-	this->lightArray[this->nrOfLights].GetMesh().createMesh("ObjectFiles/moon.obj", colors);
+	this->lightArray[this->nrOfLights].GetMesh().createMesh("ObjectFiles/moon.obj", color);
 	this->lightArray[this->nrOfLights].GetPos() = position;
 	this->lightArray[this->nrOfLights].GetColor() = color;
+	this->lightArray[this->nrOfLights].GetScale() = glm::vec3(0.2f,0.2f,0.2f);
+
 	this->nrOfLights++;
 }
 
@@ -50,16 +49,24 @@ void PointLightHandler::initiateLights(GLuint *program)
 	this->loc_NrOfLights = glGetUniformLocation(*program, "NR_OF_POINT_LIGHTS");
 }
 
-void PointLightHandler::Draw()
+void PointLightHandler::Draw(int index)
 {
-	for (int i = 0; i < this->nrOfLights; i++)
-	{
-		lightArray[i].Draw();
-	}
+	lightArray[index].Draw();
+}
+
+GLuint PointLightHandler::getNrOfLights()
+{
+	return this->nrOfLights;
+}
+
+Transform *PointLightHandler::getTransform(int index)
+{
+	return this->lightArray[index].getTransform();
 }
 
 PointLightHandler::~PointLightHandler()
 {
+
 }
 
 PointLight::PointLight()
@@ -77,12 +84,27 @@ glm::vec3 & PointLight::GetPos()
 	return this->transform.GetPos();
 }
 
+glm::vec3 & PointLight::GetScale()
+{
+	return this->transform.GetScale();
+}
+
 glm::vec3 & PointLight::GetColor()
 {
 	return this->color;
 }
 
+Transform *PointLight::getTransform()
+{
+	return &this->transform;
+}
+
 void PointLight::Draw()
 {
 	this->mesh.Draw();
+}
+
+PointLight::~PointLight()
+{
+
 }

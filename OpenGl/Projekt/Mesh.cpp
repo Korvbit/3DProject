@@ -29,7 +29,7 @@ Mesh::Mesh(const char * meshPath)
 	createMesh(meshPath);
 }
 
-Mesh::Mesh(const char * meshPath, std::vector<glm::vec3> color)
+Mesh::Mesh(const char * meshPath, glm::vec3 color)
 {
 	createMesh(meshPath, color);
 }
@@ -41,6 +41,11 @@ void Mesh::Draw()
 	glDrawArrays(GL_TRIANGLES, 0, drawCount);
 
 	glBindVertexArray(0);
+}
+
+unsigned int Mesh::GetDrawCount()
+{
+	return this->drawCount;
 }
 
 Mesh::~Mesh()
@@ -104,7 +109,7 @@ void Mesh::createMesh(std::vector<glm::vec3> vertices, std::vector<glm::vec2> uv
 	glBindVertexArray(0);
 }
 
-bool Mesh::createMesh(const char * meshPath, std::vector<glm::vec3> color)
+bool Mesh::createMesh(const char * meshPath, glm::vec3 color)
 {
 	bool loaded = false;
 
@@ -115,6 +120,14 @@ bool Mesh::createMesh(const char * meshPath, std::vector<glm::vec3> color)
 	loaded = loadMesh(meshPath, vertices, uvCoords, normals);
 
 	drawCount = vertices.size();
+
+	vector<glm::vec3> colors;
+
+	for (int i = 0; i < drawCount; i++)
+	{
+		// Store the color for each vertex of the obj.
+		colors.push_back(color);
+	}
 
 	glGenVertexArrays(1, &vertexArrayObject);
 	glBindVertexArray(vertexArrayObject);
@@ -127,11 +140,11 @@ bool Mesh::createMesh(const char * meshPath, std::vector<glm::vec3> color)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 													// This is really color and not texture coordinates
-	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[TEXCOORD_VB]);
-	glBufferData(GL_ARRAY_BUFFER, color.size() * sizeof(color[0]), &color[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[1]);
+	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(colors[0]), &colors[0], GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glBindVertexArray(0);
 

@@ -31,13 +31,21 @@ void Shader::Update(const Transform & transform, const Camera& camera)
 	glUniformMatrix4fv(uniforms[WORLD_U], 1, GL_FALSE, &modelW[0][0]);
 }
 
-void Shader::initiateShaders()
+void Shader::initiateShaders(bool color)
 {
 	for (unsigned int i = 0; i < NUM_OF_SHADERS; i++)
 		glAttachShader(program, shaders[i]);
 
 	glBindAttribLocation(program, 0, "position");
-	glBindAttribLocation(program, 1, "texCoord");
+
+	if (color == true)
+	{
+		glBindAttribLocation(program, 1, "color");
+	}
+	else
+	{
+		glBindAttribLocation(program, 1, "texCoord");
+	}	
 
 	glLinkProgram(program);
 	CheckShaderError(program, GL_LINK_STATUS, true, "Error: Program linking failed: ");

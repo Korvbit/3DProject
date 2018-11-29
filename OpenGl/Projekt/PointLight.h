@@ -21,9 +21,14 @@ private:
 public:
 	PointLight();
 	Mesh& GetMesh();
+
 	glm::vec3& GetPos();
+	glm::vec3& GetScale();
 	glm::vec3& GetColor();
+	
+	Transform *getTransform();
 	void Draw();
+	virtual ~PointLight();
 };
 
 class PointLightHandler
@@ -43,7 +48,10 @@ public:
 
 	void sendToShader();
 	void initiateLights(GLuint *program);
-	void Draw();
+	void Draw(int index);
+
+	GLuint getNrOfLights();
+	Transform *getTransform(int index);
 
 	virtual ~PointLightHandler();
 };

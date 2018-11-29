@@ -35,6 +35,7 @@ int SCREENHEIGHT = 600;
 void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Camera *camera, ObjectHandler *OH, Texture* snowTexture, Texture* swordTexture);
 void DRLightPass(GBuffer *gBuffer, Mesh *fullScreenQuad, GLuint *program, Shader *geometryPass);
 void particlePass(Particle * particle, Camera * camera, Shader * particleShader, float deltaTime);
+void lightSpherePass(Shader *pointLightPass, PointLightHandler *lights, Camera *camera, double counter);
 
 void sendCameraLocationToGPU(GLuint cameraLocation, Camera *camera);
 void prepareTexture(GLuint textureLoc, GLuint normalMapLoc);
@@ -65,10 +66,10 @@ int main()
 	pointLightPass.CreateShader(".\\pointLightShader.vs", GL_VERTEX_SHADER);
 	pointLightPass.CreateShader(".\\pointLightShader.fs", GL_FRAGMENT_SHADER);
 
-	geometryPass.initiateShaders();
-	lightPass.initiateShaders();
-	particleShader.initiateShaders();
-	pointLightPass.initiateShaders();
+	geometryPass.initiateShaders(false);
+	lightPass.initiateShaders(false);
+	particleShader.initiateShaders(false);
+	pointLightPass.initiateShaders(true);
 	
 	Camera camera(glm::vec3(-15, 25, -53), 70.0f,(float)SCREENWIDTH / (float)SCREENHEIGHT, 0.01f, 1000.0f);
 	
@@ -122,7 +123,6 @@ int main()
 	double lastTime = 0;
 	double deltaTime = 0;
 
-
 	// Create Lights
 	PointLightHandler lights;
 	lights.createLight(glm::vec3(10.0f, 7.0f, -3.0f), glm::vec3(1.0f, 0.0f, 1.0f));
@@ -131,6 +131,9 @@ int main()
 	lights.createLight(glm::vec3(4.0f, 7.0f, -10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	lights.createLight(glm::vec3(-4.0f, 7.0f, -10.0f), glm::vec3(0.0f, 1.0f, 0.5f));
 	lights.createLight(glm::vec3(0.0f, 7.0f, 6.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+	lights.createLight(glm::vec3(15.0f, 7.0f, 15.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	lights.createLight(glm::vec3(7.0f, 7.0f, 15.0f), glm::vec3(0.3f, 0.0f, 0.0f));
+
 	
 	lights.initiateLights(lightPass.getProgram());
 
@@ -145,6 +148,8 @@ int main()
 
 	texLoc = glGetUniformLocation(*geometryPass.getProgram(), "texture");
 	normalTexLoc = glGetUniformLocation(*geometryPass.getProgram(), "normalMap");
+
+	GLuint viewProjection = glGetUniformLocation(*pointLightPass.getProgram(), "viewProjectionMatrix");
 
 	while(!display.IsWindowClosed())
 	{
@@ -169,13 +174,11 @@ int main()
 		DRLightPass(&gBuffer, &fullScreenTriangle, lightPass.getProgram(), &lightPass);
 		lightPass.unBind();
 
+		// Draw lightSpheres	
+		lightSpherePass(&pointLightPass, &lights, &camera, counter);
+
 		// Draw particles
 		particlePass(&particle, &camera, &particleShader, deltaTime);
-
-		// Draw lightbölbz
-		pointLightPass.Bind();
-		lights.Draw();
-		pointLightPass.unBind();
 
 		// Check for mouse/keyboard inputs and handle the camera movement
 		mouseControls(&display, &camera);
@@ -265,6 +268,23 @@ void particlePass(Particle * particle, Camera * camera, Shader * particleShader,
 
 	// Unbind the shader
 	particleShader->unBind();
+}
+
+void lightSpherePass(Shader *pointLightPass, PointLightHandler *lights, Camera *camera, double counter)
+{
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
+	lights->getTransform(6)->GetPos().y = sinf(counter * 5) * 2 + 7;
+
+	pointLightPass->Bind();
+	for (int i = 0; i < lights->getNrOfLights(); i++)
+	{
+		pointLightPass->Update(*lights->getTransform(i), *camera);
+		lights->Draw(i);
+	}
+	pointLightPass->unBind();
+	glDisable(GL_CULL_FACE);
 }
 
 void sendCameraLocationToGPU(GLuint cameraLocation, Camera *camera)

@@ -30,16 +30,17 @@ public:
 	Mesh(Vertex* vertices, unsigned int numOfVertices);
 	//Mesh(std::vector<glm::vec3> vertices, std::vector<glm::vec2> uvCoords);
 	Mesh(const char * meshPath);
-	Mesh(const char * meshPath, std::vector<glm::vec3> color);
+	Mesh(const char * meshPath, glm::vec3 color);
 	Mesh() {}
 	void Draw();
+	unsigned int GetDrawCount();
 
 	void operator=(const Mesh& other) {}
 
 	virtual ~Mesh();
 	bool createMesh(const char * meshPath);
 	void createMesh(std::vector<glm::vec3> vertices, std::vector<glm::vec2> uvCoords);
-	bool createMesh(const char * meshPath, std::vector<glm::vec3> color);
+	bool createMesh(const char * meshPath, glm::vec3 color);
 	bool loadMesh(const char * objectPath, vector<glm::vec3>& vertices, vector<glm::vec2>& uvs, vector<glm::vec3>& normals);
 private:
 	enum

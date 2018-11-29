@@ -17,7 +17,7 @@ public:
 	void Bind();
 	void unBind();
 	void Update(const Transform& transform, const Camera& camera);
-	void initiateShaders();
+	void initiateShaders(bool color);
 
 	GLuint CreateShader(const std::string& fileName, GLenum shaderType);
 	GLuint *getProgram();

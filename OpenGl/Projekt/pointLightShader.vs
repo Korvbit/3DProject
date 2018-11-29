@@ -1,15 +1,13 @@
 #version 440
 
-in vec3 position;
-in vec3 texCoord; // This is color in this case
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec3 color;
 
-out vec3 color;
+out vec3 colorOut;
 
 uniform mat4 transformationMatrix;
-uniform mat4 worldMatrix;
-
 void main()
 {
-	gl_Position = transformationMatrix * vec4(position, 1.0f);
-	color = texCoord;
+	gl_Position = transformationMatrix * vec4(position.xyz, 1.0f);
+	colorOut = color;
 }
