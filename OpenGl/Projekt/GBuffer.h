@@ -29,6 +29,8 @@ public:
 	// Binds the FBO(Frame Buffer Object) as input so its contents can be dumped to the screen
 	// A FBO is a container for textures and an optional depth buffer
 	void BindForReading();
+
+	void bindDepth(unsigned int SCREENWIDTH, unsigned int SCREENHEIGHT);
 private:
 
 	unsigned int SCREENWIDTH = 800;

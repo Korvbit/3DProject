@@ -155,7 +155,7 @@ int main()
 	{
 		deltaTime = currentTime - lastTime;
 		lastTime = glfwGetTime();
-		
+
 		geometryPass.Bind();
 
 		sendCameraLocationToGPU(cameraLocationGP, &camera);
@@ -174,12 +174,18 @@ int main()
 		DRLightPass(&gBuffer, &fullScreenTriangle, lightPass.getProgram(), &lightPass);
 		lightPass.unBind();
 
+		// ----------------------- PROBLEM ---------------------------
+		//glEnable(GL_DEPTH_TEST);
+		//gBuffer.bindDepth(SCREENWIDTH, SCREENHEIGHT);
 		// Draw lightSpheres	
-		lightSpherePass(&pointLightPass, &lights, &camera, counter);
-
+		//lightSpherePass(&pointLightPass, &lights, &camera, counter);
+		
+		
 		// Draw particles
-		particlePass(&particle, &camera, &particleShader, deltaTime);
+		//particlePass(&particle, &camera, &particleShader, deltaTime);
 
+		// ----------------------- PROBLEM ---------------------------
+		
 		// Check for mouse/keyboard inputs and handle the camera movement
 		mouseControls(&display, &camera);
 		keyboardControls(&display, &camera);
@@ -216,7 +222,7 @@ void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Came
 		OH->getObject(i)->Draw();
 	}
 
-	glDisable(GL_DEPTH_TEST);
+	//glDisable(GL_DEPTH_TEST);
 }
 
 void DRLightPass(GBuffer *gBuffer, Mesh *fullScreenTriangle, GLuint *program, Shader *lightPass)
@@ -231,7 +237,9 @@ void DRLightPass(GBuffer *gBuffer, Mesh *fullScreenTriangle, GLuint *program, Sh
 	lightPass->sendGBufferVariablesToGPU("gDiffuse", GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);
 	lightPass->sendGBufferVariablesToGPU("gNormal", GBuffer::GBUFFER_TEXTURE_TYPE_NORMAL);
 	
+	glDisable(GL_DEPTH_TEST);
 	fullScreenTriangle->Draw();
+	glEnable(GL_DEPTH_TEST);
 }
 
 // This function draws particles to the screen.
@@ -275,7 +283,7 @@ void lightSpherePass(Shader *pointLightPass, PointLightHandler *lights, Camera *
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-	lights->getTransform(6)->GetPos().y = sinf(counter * 5) * 2 + 7;
+	//lights->getTransform(6)->GetPos().y = sinf(counter * 5) * 2 + 7;
 
 	pointLightPass->Bind();
 	for (int i = 0; i < lights->getNrOfLights(); i++)

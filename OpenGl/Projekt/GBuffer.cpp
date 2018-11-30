@@ -44,7 +44,7 @@ bool GBuffer::Init(unsigned int SCREENWIDTH, unsigned int SCREENHEIGHT)
 		// Allocate Storage for the gBuffer Textures
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, SCREENWIDTH, SCREENHEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
 
-		// Cutting or adding the texture if the texture is larger then the object.
+		// Cutting or adding the texture if the texture is larger than the object.
 		// Example cutting: texture is 512:512, quad is 500:500, then these parameters does it so that the texture should be cut to 500:500
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -63,8 +63,7 @@ bool GBuffer::Init(unsigned int SCREENWIDTH, unsigned int SCREENHEIGHT)
 	// Make the depthTexture active
 	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
 	// Allocate Storage for the depthTexture
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, SCREENWIDTH, SCREENHEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT,
-		NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, SCREENWIDTH, SCREENHEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	// Attach the depth texture to the framebuffer (GL_DEPTH_ATTATCHMENT)
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture, 0);
 
@@ -85,7 +84,7 @@ bool GBuffer::Init(unsigned int SCREENWIDTH, unsigned int SCREENHEIGHT)
 void GBuffer::BindForWriting()
 {
 	// Anledningen till att vi ska ha denna istället är för att vi specificerar vad vi ska göra med FBO:n.
-	// Eftersom att vi ska skriva till den så är de onödigt att enabla både skriv/läs som händer i den andra.
+	// Eftersom att vi ska skriva till den så är de onödigt att enabla både skriv/läs.
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo);
 }
 
@@ -100,4 +99,17 @@ void GBuffer::BindForReading()
 		// Now when we bind, the bind will affect the current texture that got called by :glActivateTexture
 		glBindTexture(GL_TEXTURE_2D, m_textures[GBUFFER_TEXTURE_TYPE_POSITION + i]);
 	}
+}
+
+void GBuffer::bindDepth(unsigned int SCREENWIDTH, unsigned int SCREENHEIGHT)
+{
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, this->m_depthTexture, 0);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, this->m_fbo);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	//glBlitFramebuffer(0, 0, SCREENWIDTH, SCREENHEIGHT, 0, 0, SCREENWIDTH, SCREENHEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBlitNamedFramebuffer(this->m_fbo, 0, 0, 0, SCREENWIDTH, SCREENHEIGHT, 0, 0, SCREENWIDTH, SCREENHEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }

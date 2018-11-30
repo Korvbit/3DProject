@@ -1,14 +1,12 @@
 ﻿  Main.cpp
-c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(181): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(212): warning C4018: '<': signed/unsigned mismatch
-c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(278): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(281): warning C4018: '<': signed/unsigned mismatch
-c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(321): warning C4305: '=': truncation from 'double' to 'T'
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(218): warning C4018: '<': signed/unsigned mismatch
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(289): warning C4018: '<': signed/unsigned mismatch
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(329): warning C4305: '=': truncation from 'double' to 'T'
           with
           [
               T=float
           ]
-c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(322): warning C4305: '=': truncation from 'double' to 'T'
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(330): warning C4305: '=': truncation from 'double' to 'T'
           with
           [
               T=float
