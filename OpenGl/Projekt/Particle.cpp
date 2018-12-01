@@ -90,7 +90,7 @@ void Particle::generateParticles(float deltaTime)
 
 		// Set the start values of the new particle
 		// Life (Length in seconds which describes how long the particle should be alive)
-		this->particleArray[index].life = 5.0f;
+		this->particleArray[index].life = 12.0f;
 		// Position
 		int max = 30;
 		int min = -30;
@@ -143,7 +143,7 @@ void Particle::simulateParticles(glm::vec3 cameraPosition, float deltaTime)
 			{
 				// Update the attributes of the particle
 				// Speed
-				tempParticle.speed += glm::vec3(0.0f, -9.82f, 0.0f) * deltaTime * 0.5f;
+				tempParticle.speed += glm::vec3(0.0f, -9.82f, 0.0f) * deltaTime * 0.5f / 15.0f;
 
 				// Position
 				tempParticle.pos += tempParticle.speed * deltaTime;

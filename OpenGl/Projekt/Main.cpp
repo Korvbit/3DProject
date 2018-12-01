@@ -156,6 +156,8 @@ int main()
 		deltaTime = currentTime - lastTime;
 		lastTime = glfwGetTime();
 
+		// ================== Geometry Pass - Deffered Rendering ==================
+
 		geometryPass.Bind();
 
 		sendCameraLocationToGPU(cameraLocationGP, &camera);
@@ -164,6 +166,13 @@ int main()
 		// Here all the objets gets transformed, and then sent to the GPU with a draw call
 		DRGeometryPass(&gBuffer, counter, &geometryPass, &camera, &OH, &snowTexture, &swordTexture);
 		geometryPass.unBind();
+
+		// ================== Geometry Pass - Deffered Rendering ==================
+
+		// Copies the depthbuffer into the default FBO
+		gBuffer.bindDepth(SCREENWIDTH, SCREENHEIGHT);
+
+		// ================== Light Pass - Deffered Rendering ==================
 
 		lightPass.Bind();
 
@@ -174,15 +183,15 @@ int main()
 		DRLightPass(&gBuffer, &fullScreenTriangle, lightPass.getProgram(), &lightPass);
 		lightPass.unBind();
 
+		// ================== Light Pass - Deffered Rendering ==================
+
 		// ----------------------- PROBLEM ---------------------------
-		//glEnable(GL_DEPTH_TEST);
-		//gBuffer.bindDepth(SCREENWIDTH, SCREENHEIGHT);
-		// Draw lightSpheres	
-		//lightSpherePass(&pointLightPass, &lights, &camera, counter);
 		
+		// Draw lightSpheres	
+		lightSpherePass(&pointLightPass, &lights, &camera, counter);
 		
 		// Draw particles
-		//particlePass(&particle, &camera, &particleShader, deltaTime);
+		particlePass(&particle, &camera, &particleShader, deltaTime);
 
 		// ----------------------- PROBLEM ---------------------------
 		
@@ -206,7 +215,7 @@ void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Came
 {
 	gBuffer->BindForWriting();
 
-	glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	//EVENTUELLT gör detta till egen funktion i Display
 	
