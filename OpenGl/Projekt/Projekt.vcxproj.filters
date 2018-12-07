@@ -66,6 +66,9 @@
     <ClCompile Include="Bloom.cpp">
       <Filter>Class cpp.Files</Filter>
     </ClCompile>
+    <ClCompile Include="Blur.cpp">
+      <Filter>Class cpp.Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Display.h">
@@ -110,6 +113,9 @@
     <ClInclude Include="Bloom.h">
       <Filter>Class h.Files</Filter>
     </ClInclude>
+    <ClInclude Include="Blur.h">
+      <Filter>Class h.Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="lightPass.fs">
@@ -137,6 +143,18 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="pointLightShader.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="blurShader.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="blurShader.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="finalShader.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="finalShader.fs">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

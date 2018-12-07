@@ -124,6 +124,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Bloom.cpp" />
+    <ClCompile Include="Blur.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Display.cpp" />
     <ClCompile Include="GBuffer.cpp" />
@@ -143,6 +144,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bloom.h" />
+    <ClInclude Include="Blur.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Display.h" />
     <ClInclude Include="GBuffer.h" />
@@ -158,6 +160,10 @@
     <ClInclude Include="Transform.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="blurShader.fs" />
+    <None Include="blurShader.vs" />
+    <None Include="finalShader.fs" />
+    <None Include="finalShader.vs" />
     <None Include="lightPass.fs" />
     <None Include="lightPass.vs" />
     <None Include="geometryPass.fs" />
