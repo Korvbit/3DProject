@@ -8,20 +8,22 @@ class BloomBuffer
 {
 public:
 	enum BLOOMBUFFER_TEXTURE_TYPE
-	{
-		BLOOMBUFFER_TEXTURE_TYPE_BLOOMMAP,
+	{	
 		BLOOMBUFFER_TEXTURE_TYPE_DIFFUSE,
+		BLOOMBUFFER_TEXTURE_TYPE_BLOOMMAP,
 		BLOOMBUFFER_NUM_TEXTURES
 	};
 
 	BloomBuffer();
 	~BloomBuffer();
 
-	void Init(unsigned int SCREENWIDTH, unsigned int SCREENHEIGHT);
+	bool Init(unsigned int SCREENWIDTH, unsigned int SCREENHEIGHT);
+	void bindForWriting();
+	void bindForReading();
 
 private:
 	GLuint m_fbo;
-	GLuint m_textures[BLOOMBUFFER_NUM_TEXTURES];
+	GLuint m_colorBuffers[BLOOMBUFFER_NUM_TEXTURES];
 	GLuint m_depthTexture;
 };
 

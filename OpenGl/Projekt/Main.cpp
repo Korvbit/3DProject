@@ -13,6 +13,8 @@
 #include "PointLight.h"
 #include "Particle.h"
 #include <stdio.h>
+#include "Bloom.h"
+
 // Finns en main funktion i GLEW, därmed måste vi undefinera den innan vi kan använda våran main
 #undef main
 
@@ -33,9 +35,9 @@ int SCREENHEIGHT = 600;
 
 // Deferred Rendering Functions
 void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Camera *camera, ObjectHandler *OH, Texture* snowTexture, Texture* swordTexture);
-void DRLightPass(GBuffer *gBuffer, Mesh *fullScreenQuad, GLuint *program, Shader *geometryPass);
+void DRLightPass(GBuffer *gBuffer, BloomBuffer *bBuffer, Mesh *fullScreenQuad, GLuint *program, Shader *geometryPass);
 void particlePass(Particle * particle, Camera * camera, Shader * particleShader, float deltaTime);
-void lightSpherePass(Shader *pointLightPass, PointLightHandler *lights, Camera *camera, double counter);
+void lightSpherePass(Shader *pointLightPass, BloomBuffer *bBuffer, PointLightHandler *lights, Camera *camera, double counter);
 
 void sendCameraLocationToGPU(GLuint cameraLocation, Camera *camera);
 void prepareTexture(GLuint textureLoc, GLuint normalMapLoc);
@@ -105,6 +107,9 @@ int main()
 
 	GBuffer gBuffer;
 	gBuffer.Init(SCREENWIDTH, SCREENHEIGHT);
+
+	BloomBuffer bBuffer;
+	bBuffer.Init(SCREENWIDTH, SCREENHEIGHT);
 
 	// https://rauwendaal.net/2014/06/14/rendering-a-screen-covering-triangle-in-opengl/
 	Vertex fullScreenVerticesTriangle[] =
@@ -180,15 +185,15 @@ int main()
 		sendCameraLocationToGPU(cameraLocationLP, &camera);
 		
 		// Here the fullscreenTriangel is drawn, and lights are sent to the GPU
-		DRLightPass(&gBuffer, &fullScreenTriangle, lightPass.getProgram(), &lightPass);
+		DRLightPass(&gBuffer, &bBuffer, &fullScreenTriangle, lightPass.getProgram(), &lightPass);
 		lightPass.unBind();
 
 		// ================== Light Pass - Deffered Rendering ==================
 
 		// ----------------------- PROBLEM ---------------------------
 		
-		// Draw lightSpheres	
-		lightSpherePass(&pointLightPass, &lights, &camera, counter);
+		// Draw lightSpheres
+		lightSpherePass(&pointLightPass, &bBuffer, &lights, &camera, counter);
 		
 		// Draw particles
 		particlePass(&particle, &camera, &particleShader, deltaTime);
@@ -234,10 +239,11 @@ void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Came
 	//glDisable(GL_DEPTH_TEST);
 }
 
-void DRLightPass(GBuffer *gBuffer, Mesh *fullScreenTriangle, GLuint *program, Shader *lightPass)
+void DRLightPass(GBuffer *gBuffer, BloomBuffer *bBuffer, Mesh *fullScreenTriangle, GLuint *program, Shader *lightPass)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+	// Bloom buffer, write finalColor and brightness.
+	bBuffer->bindForWriting();
+	bBuffer->bindForReading();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	gBuffer->BindForReading();
@@ -254,6 +260,8 @@ void DRLightPass(GBuffer *gBuffer, Mesh *fullScreenTriangle, GLuint *program, Sh
 // This function draws particles to the screen.
 void particlePass(Particle * particle, Camera * camera, Shader * particleShader, float deltaTime)
 {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 	// We need the camera right/up vector and the camera location in world space to be able to make billboards out of the particles
 	// PS = ParticleShader
 	GLuint cameraRightWorldPS = glGetUniformLocation(*particleShader->getProgram(), "cameraRightWorldPS");
@@ -287,8 +295,10 @@ void particlePass(Particle * particle, Camera * camera, Shader * particleShader,
 	particleShader->unBind();
 }
 
-void lightSpherePass(Shader *pointLightPass, PointLightHandler *lights, Camera *camera, double counter)
+void lightSpherePass(Shader *pointLightPass, BloomBuffer *bBuffer, PointLightHandler *lights, Camera *camera, double counter)
 {
+	bBuffer->bindForWriting();
+
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
