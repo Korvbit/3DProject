@@ -12,5 +12,6 @@ void main()
 	vec3 sceneColor = texture2D(scene, texCoord0).xyz;
 	vec3 bloomColor = texture2D(bright, texCoord0).xyz;
 
-	fragment_color = vec4(sceneColor.xyz + bloomColor.xyz, 1.0f);
+	//fragment_color = vec4(sceneColor.xyz + bloomColor.xyz, 1.0f);
+	fragment_color = vec4(sceneColor, 1.0f);
 }

@@ -9,11 +9,14 @@ uniform sampler2D scene;
 
 void main()
 {
-	float fade[5] = {0.2270270270f, 0.1945945946f, 0.1216216216f, 0.0540540541f, 0.0162162162f};
+	float fade[5] = {0.2270270270, 0.1945945946, 0.1216216216, 0.0540540541, 0.0162162162};
     vec2 offset = 1.0 / textureSize(scene, 0); // gets size of single texel
     vec3 result = texture(scene, texCoord0).rgb * fade[0];
+
+	//vec3 materialColor = texture2D(scene, texCoord0).rgb;
     if(horizontal)
     {
+			//fragment_color = vec4(1.0f,0.0f,0.0f,1.0f);
         for(int i = 1; i < 5; ++i)
         {
            result += texture2D(scene, texCoord0 + vec2(offset.x * i, 0.0)).rgb * fade[i];
@@ -22,6 +25,7 @@ void main()
     }
     else
     {
+			//fragment_color = vec4(0.0f,1.0f,0.0f,1.0f);
         for(int i = 1; i < 5; ++i)
         {
             result += texture2D(scene, texCoord0 + vec2(0.0, offset.y * i)).rgb * fade[i];
@@ -29,4 +33,11 @@ void main()
         }
     }
     fragment_color = vec4(result, 1.0);
+	
+	//fragment_color = vec4(materialColor.rgb, 1.0f);
+
+	//vec3 materialColor = texture2D(scene, texCoord0).rgb;
+
+	//fragment_color = vec4(materialColor.rgb, 1.0f);
+	//fragment_color = vec4(0.0f,1.0f,0.0f,1.0f);
 }

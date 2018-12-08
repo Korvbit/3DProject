@@ -30,6 +30,7 @@ bool BloomBuffer::Init(unsigned int SCREENWIDTH, unsigned int SCREENHEIGHT)
 
 	glGenFramebuffers(1, &m_fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+
 	glGenTextures(BLOOMBUFFER_NUM_TEXTURES, m_colorBuffers);
 	for (unsigned int i = 0; i < BLOOMBUFFER_NUM_TEXTURES; i++)
 	{
@@ -85,3 +86,27 @@ void BloomBuffer::bindForReading()
 	}
 }
 
+void BloomBuffer::setReadBuffer(BLOOMBUFFER_TEXTURE_TYPE TextureType)
+{
+	glReadBuffer(GL_COLOR_ATTACHMENT0 + TextureType);
+}
+
+void BloomBuffer::bindForReadingBloomMap()
+{
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_fbo);
+
+	// if we have different textures to bind, we need to change the current texture openGL is working with.
+	glActiveTexture(GL_TEXTURE1);
+	// Now when we bind, the bind will affect the current texture that got called by :glActivateTexture
+	glBindTexture(GL_TEXTURE_2D, m_colorBuffers[BLOOMBUFFER_TEXTURE_TYPE_BLOOMMAP]);
+}
+
+void BloomBuffer::bindForReadingDiffuse()
+{
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_fbo);
+
+	// if we have different textures to bind, we need to change the current texture openGL is working with.
+	glActiveTexture(GL_TEXTURE0);
+	// Now when we bind, the bind will affect the current texture that got called by :glActivateTexture
+	glBindTexture(GL_TEXTURE_2D, m_colorBuffers[BLOOMBUFFER_TEXTURE_TYPE_DIFFUSE]);
+}

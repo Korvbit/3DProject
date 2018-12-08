@@ -122,9 +122,8 @@ int main()
 	BloomBuffer bloomBuffer;
 	bloomBuffer.Init(SCREENWIDTH, SCREENHEIGHT);
 
-	BlurBuffer blurBuffers[2];
-	blurBuffers[0].Init(SCREENWIDTH, SCREENHEIGHT);
-	blurBuffers[1].Init(SCREENWIDTH, SCREENHEIGHT);
+	BlurBuffer blurBuffers;
+	blurBuffers.Init(SCREENWIDTH, SCREENHEIGHT);
 
 	// https://rauwendaal.net/2014/06/14/rendering-a-screen-covering-triangle-in-opengl/
 	Vertex fullScreenVerticesTriangle[] =
@@ -211,13 +210,13 @@ int main()
 		lightSpherePass(&pointLightPass, &bloomBuffer, &lights, &camera, counter);
 		
 		// Draw particles
-		particlePass(&particle, &camera, &particleShader, deltaTime);
+		//particlePass(&particle, &camera, &particleShader, deltaTime);
 
 		// ----------------------- PROBLEM ---------------------------
 		
-		blurPass(&blurShader, &bloomBuffer, blurBuffers, &fullScreenTriangle);
+		blurPass(&blurShader, &bloomBuffer, &blurBuffers, &fullScreenTriangle);
 
-		finalPass(&finalShader, &bloomBuffer, blurBuffers, &fullScreenTriangle);
+		finalPass(&finalShader, &bloomBuffer, &blurBuffers, &fullScreenTriangle);
 
 		// Check for mouse/keyboard inputs and handle the camera movement
 		mouseControls(&display, &camera);
@@ -331,63 +330,96 @@ void lightSpherePass(Shader *pointLightPass, BloomBuffer *bloomBuffer, PointLigh
 	}
 	pointLightPass->unBind();
 	glDisable(GL_CULL_FACE);
+
+	// TEST FÖR ATT SE OM RÄTT SAKER HAR SPARATS I BLOOMBUFFER
+	/*glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	bloomBuffer->bindForReading();
+
+	GLsizei HalfWidth = (GLsizei)(SCREENWIDTH/ 2.0f);
+	GLsizei HalfHeight = (GLsizei)(SCREENHEIGHT / 2.0f);
+
+	bloomBuffer->setReadBuffer(BloomBuffer::BLOOMBUFFER_TEXTURE_TYPE_DIFFUSE);
+	glBlitFramebuffer(0, 0, SCREENWIDTH, SCREENHEIGHT,
+		0, 0, SCREENWIDTH, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+	bloomBuffer->setReadBuffer(BloomBuffer::BLOOMBUFFER_TEXTURE_TYPE_BLOOMMAP);
+	glBlitFramebuffer(0, 0, SCREENWIDTH, SCREENHEIGHT,
+		0, HalfHeight, SCREENWIDTH, SCREENHEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR);*/
 }
 
 void blurPass(Shader *blurShader, BloomBuffer *bloomBuffer, BlurBuffer *blurBuffers, Mesh *fullScreenTriangle)
 {
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-
-	bool horizontal = true, first_iteration = true;
-	unsigned int amount = 10;
 	blurShader->Bind();
-	for (unsigned int i = 0; i < amount; i++)
+	int timesToBlur = 10;
+	bool horizontal = true;
+	bool firstBlur = true;
+
+	//GLuint loc = glGetUniformLocation(*blurShader->getProgram(), "scene");
+
+	for (int i = 0; i < timesToBlur; i++)
 	{
-		blurBuffers[horizontal].bindForWriting();
-		blurShader->sendGBufferVariablesToGPU("horizontal", horizontal);
-		if (first_iteration)
+		blurBuffers->bindForWriting(!horizontal);
+
+		if (firstBlur == true)
 		{
-			bloomBuffer->bindForReading();
+			bloomBuffer->bindForReadingBloomMap();
+			blurShader->sendGBufferVariablesToGPU("horizontal", !horizontal);
 			blurShader->sendGBufferVariablesToGPU("scene", BloomBuffer::BLOOMBUFFER_TEXTURE_TYPE_BLOOMMAP);
 		}
 		else
 		{
-			blurBuffers[!horizontal].bindForReading();
-			blurShader->sendGBufferVariablesToGPU("scene", BlurBuffer::BLURBUFFER_TEXTURE_TYPE_BLUR);
-		}
+			blurBuffers->bindForReading(horizontal);
+			blurShader->sendGBufferVariablesToGPU("horizontal", !horizontal);
 
+			// 1 because we have different fbo's, so the ENUM doesn't work properly
+			blurShader->sendGBufferVariablesToGPU("scene", 1);
+		}
+		
+		glDisable(GL_DEPTH_TEST);
 		fullScreenTriangle->Draw();
+		glEnable(GL_DEPTH_TEST);
 
 		horizontal = !horizontal;
-		if (first_iteration)
-			first_iteration = false;
+		if (firstBlur)
+		{
+			firstBlur = false;
+		}	
 	}
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glDisable(GL_CULL_FACE);
+	// Test for blur
+	/*glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	blurBuffers->bindForReading(1);
+
+	GLsizei HalfWidth = (GLsizei)(SCREENWIDTH / 2.0f);
+	GLsizei HalfHeight = (GLsizei)(SCREENHEIGHT / 2.0f);
+
+	blurBuffers->setReadBuffer(BlurBuffer::BLURBUFFER_TEXTURE_TYPE_BLUR);
+	glBlitFramebuffer(0, 0, SCREENWIDTH, SCREENHEIGHT,
+		0, 0, SCREENWIDTH, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);*/
 }
 
 void finalPass(Shader *finalShader, BloomBuffer *bloomBuffer, BlurBuffer *blurBuffers, Mesh *fullScreenTriangle)
 {
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	finalShader->Bind();
 
-	//glActiveTexture(GL_TEXTURE0);		han skriver detta så provade, men gör ingen skillnad
-	bloomBuffer->bindForReading();
-	finalShader->sendGBufferVariablesToGPU("scene", BloomBuffer::BLOOMBUFFER_TEXTURE_TYPE_BLOOMMAP);
+	bloomBuffer->bindForReadingDiffuse();
+	finalShader->sendGBufferVariablesToGPU("scene", BloomBuffer::BLOOMBUFFER_TEXTURE_TYPE_DIFFUSE);
 
-	//glActiveTexture(GL_TEXTURE1);		detta å
-	blurBuffers[1].bindForReading();
-	finalShader->sendGBufferVariablesToGPU("bright", BlurBuffer::BLURBUFFER_TEXTURE_TYPE_BLUR);
+	blurBuffers->bindForReading(1);
+	finalShader->sendGBufferVariablesToGPU("bright", 0);
 
+	glDisable(GL_DEPTH_TEST);
 	fullScreenTriangle->Draw();
-
-	glDisable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
 }
 
 void sendCameraLocationToGPU(GLuint cameraLocation, Camera *camera)

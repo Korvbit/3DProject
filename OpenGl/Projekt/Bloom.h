@@ -21,6 +21,11 @@ public:
 	void bindForWriting();
 	void bindForReading();
 
+	// temp skit
+	void setReadBuffer(BLOOMBUFFER_TEXTURE_TYPE TextureType);
+	void bindForReadingBloomMap();
+	void bindForReadingDiffuse();
+
 private:
 	GLuint m_fbo;
 	GLuint m_colorBuffers[BLOOMBUFFER_NUM_TEXTURES];
