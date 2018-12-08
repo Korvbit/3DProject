@@ -91,12 +91,12 @@ void BloomBuffer::setReadBuffer(BLOOMBUFFER_TEXTURE_TYPE TextureType)
 	glReadBuffer(GL_COLOR_ATTACHMENT0 + TextureType);
 }
 
-void BloomBuffer::bindForReadingBloomMap()
+void BloomBuffer::bindForReadingBloomMap(int textureUnit)
 {
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_fbo);
 
 	// if we have different textures to bind, we need to change the current texture openGL is working with.
-	glActiveTexture(GL_TEXTURE1);
+	glActiveTexture(GL_TEXTURE0 + textureUnit);
 	// Now when we bind, the bind will affect the current texture that got called by :glActivateTexture
 	glBindTexture(GL_TEXTURE_2D, m_colorBuffers[BLOOMBUFFER_TEXTURE_TYPE_BLOOMMAP]);
 }

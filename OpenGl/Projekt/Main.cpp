@@ -188,9 +188,6 @@ int main()
 
 		// ================== Geometry Pass - Deffered Rendering ==================
 
-		// Copies the depthbuffer into the default FBO
-		gBuffer.bindDepth(SCREENWIDTH, SCREENHEIGHT);
-
 		// ================== Light Pass - Deffered Rendering ==================
 
 		lightPass.Bind();
@@ -203,20 +200,16 @@ int main()
 		lightPass.unBind();
 
 		// ================== Light Pass - Deffered Rendering ==================
-
-		// ----------------------- PROBLEM ---------------------------
 		
 		// Draw lightSpheres
 		lightSpherePass(&pointLightPass, &bloomBuffer, &lights, &camera, counter);
-		
-		// Draw particles
-		//particlePass(&particle, &camera, &particleShader, deltaTime);
-
-		// ----------------------- PROBLEM ---------------------------
-		
+			
 		blurPass(&blurShader, &bloomBuffer, &blurBuffers, &fullScreenTriangle);
 
 		finalPass(&finalShader, &bloomBuffer, &blurBuffers, &fullScreenTriangle);
+
+		// Draw particles
+		particlePass(&particle, &camera, &particleShader, deltaTime);
 
 		// Check for mouse/keyboard inputs and handle the camera movement
 		mouseControls(&display, &camera);
@@ -353,7 +346,7 @@ void lightSpherePass(Shader *pointLightPass, BloomBuffer *bloomBuffer, PointLigh
 void blurPass(Shader *blurShader, BloomBuffer *bloomBuffer, BlurBuffer *blurBuffers, Mesh *fullScreenTriangle)
 {
 	blurShader->Bind();
-	int timesToBlur = 10;
+	int timesToBlur = 100;
 	bool horizontal = true;
 	bool firstBlur = true;
 
@@ -363,19 +356,21 @@ void blurPass(Shader *blurShader, BloomBuffer *bloomBuffer, BlurBuffer *blurBuff
 	{
 		blurBuffers->bindForWriting(!horizontal);
 
+		// First we read from the bloom fbo, to get a starting point of the blur. Then after that we will
+		// blur the "blurred" texture over and over again, swapping between vertical and horizontal blurring.
 		if (firstBlur == true)
 		{
-			bloomBuffer->bindForReadingBloomMap();
+			bloomBuffer->bindForReadingBloomMap(0);
 			blurShader->sendGBufferVariablesToGPU("horizontal", !horizontal);
-			blurShader->sendGBufferVariablesToGPU("scene", BloomBuffer::BLOOMBUFFER_TEXTURE_TYPE_BLOOMMAP);
+			blurShader->sendGBufferVariablesToGPU("scene", 0);
 		}
 		else
 		{
-			blurBuffers->bindForReading(horizontal);
+			blurBuffers->bindForReading(horizontal, 0);
 			blurShader->sendGBufferVariablesToGPU("horizontal", !horizontal);
 
 			// 1 because we have different fbo's, so the ENUM doesn't work properly
-			blurShader->sendGBufferVariablesToGPU("scene", 1);
+			blurShader->sendGBufferVariablesToGPU("scene", 0);
 		}
 		
 		glDisable(GL_DEPTH_TEST);
@@ -412,10 +407,10 @@ void finalPass(Shader *finalShader, BloomBuffer *bloomBuffer, BlurBuffer *blurBu
 	finalShader->Bind();
 
 	bloomBuffer->bindForReadingDiffuse();
-	finalShader->sendGBufferVariablesToGPU("scene", BloomBuffer::BLOOMBUFFER_TEXTURE_TYPE_DIFFUSE);
+	finalShader->sendGBufferVariablesToGPU("scene", 0);
 
-	blurBuffers->bindForReading(1);
-	finalShader->sendGBufferVariablesToGPU("bright", 0);
+	blurBuffers->bindForReading(1, 1);
+	finalShader->sendGBufferVariablesToGPU("bright", 1);
 
 	glDisable(GL_DEPTH_TEST);
 	fullScreenTriangle->Draw();

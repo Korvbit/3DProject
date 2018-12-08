@@ -6,10 +6,10 @@
 
 * Parsing and rendering an existing model format *DONE
 
-*  Particle system
+*  Particle system * DONE
 
 
-* Normal Mapping
+* Normal Mapping *DONE
 
 * Shadow Mapping // Helst om fralle kan ta bort
 
@@ -22,6 +22,6 @@
 
 * Camera, Röra med WASD - DONE 
 
-* Glow-effect
+* Glow-effect *DONE
 
 

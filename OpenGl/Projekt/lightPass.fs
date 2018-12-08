@@ -75,7 +75,7 @@ void main()
 	vec3 lumaVec = vec3(0.2126, 0.7152, 0.0722);
 	float brightness = dot(fragment_color.rgb, lumaVec.xyz);
 
-	if(brightness > 0.9f)
+	if(brightness > 0.84f)
 	{
 		bright_color = vec4(fragment_color.rgb, 1.0f);
 	}

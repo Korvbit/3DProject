@@ -62,17 +62,14 @@ void BlurBuffer::bindForWriting(bool horizontal)
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo[horizontal]);
 }
 
-void BlurBuffer::bindForReading(bool horizontal)
+void BlurBuffer::bindForReading(bool horizontal, int textureUnit)
 {
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_fbo[horizontal]);
 
-	for (unsigned int i = 0; i < BLURBUFFER_NUM_TEXTURES; i++)
-	{
-		// if we have different textures to bind, we need to change the current texture openGL is working with.
-		glActiveTexture(GL_TEXTURE0 + i);
-		// Now when we bind, the bind will affect the current texture that got called by :glActivateTexture
-		glBindTexture(GL_TEXTURE_2D, m_colorBuffers[BLURBUFFER_NUM_TEXTURES + i]);
-	}
+	// if we have different textures to bind, we need to change the current texture openGL is working with.
+	glActiveTexture(GL_TEXTURE0 + textureUnit);
+	// Now when we bind, the bind will affect the current texture that got called by :glActivateTexture
+	glBindTexture(GL_TEXTURE_2D, m_colorBuffers[horizontal]);
 }
 
 void BlurBuffer::setReadBuffer(BLURBUFFER_TEXTURE_TYPE TextureType)

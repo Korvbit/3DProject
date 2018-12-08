@@ -23,7 +23,7 @@ public:
 
 	// temp skit
 	void setReadBuffer(BLOOMBUFFER_TEXTURE_TYPE TextureType);
-	void bindForReadingBloomMap();
+	void bindForReadingBloomMap(int textureUnit);
 	void bindForReadingDiffuse();
 
 private:

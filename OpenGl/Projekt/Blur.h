@@ -17,7 +17,7 @@ public:
 
 	bool Init(unsigned int SCREENWIDTH, unsigned int SCREENHEIGHT);
 	void bindForWriting(bool horizontal);
-	void bindForReading(bool horizontal);
+	void bindForReading(bool horizontal, int textureUnit);
 	void setReadBuffer(BLURBUFFER_TEXTURE_TYPE TextureType);
 private:
 	GLuint m_fbo[2];
