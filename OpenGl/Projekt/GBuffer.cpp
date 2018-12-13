@@ -67,6 +67,7 @@ bool GBuffer::Init(unsigned int SCREENWIDTH, unsigned int SCREENHEIGHT)
 	// Attach the depth texture to the framebuffer (GL_DEPTH_ATTATCHMENT)
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture, 0);
 
+	std::cout << "depthtud: " << m_depthTexture << std::endl;
 	// Felcheckar
 	GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
@@ -101,11 +102,7 @@ void GBuffer::BindForReading()
 	}
 }
 
-void GBuffer::bindDepth(unsigned int SCREENWIDTH, unsigned int SCREENHEIGHT)
+GLuint GBuffer::getFBO()
 {
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, this->m_fbo);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	glBlitFramebuffer(0, 0, SCREENWIDTH, SCREENHEIGHT, 0, 0, SCREENWIDTH, SCREENHEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	return this->m_fbo;
 }

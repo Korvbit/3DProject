@@ -8,6 +8,9 @@ Camera::Camera(const glm::vec3& pos, float fov, float aspect, float zNear, float
 	this->upVector = glm::vec3(0, 1, 0);
 	viewMatrix = glm::lookAt(this->cameraPosition, this->cameraPosition + this->forwardVector, this->upVector);
 
+	// Init rotateAround
+	this->rotateAround = glm::cross(this->forwardVector, this->upVector);
+
 	// Used to locate the start position and view direction of the camera if the user gets lost.
 	this->startCameraPosition = pos;
 	this->startForwardVector = this->forwardVector;

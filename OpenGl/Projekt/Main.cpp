@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include "Bloom.h"
 #include "Blur.h"
+#include "FinalFBO.h"
 
 // Finns en main funktion i GLEW, därmed måste vi undefinera den innan vi kan använda våran main
 #undef main
@@ -34,13 +35,14 @@ enum objectIndices
 int SCREENWIDTH = 800;
 int SCREENHEIGHT = 600;
 
-// Deferred Rendering Functions
+// Shader pass functions
 void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Camera *camera, ObjectHandler *OH, Texture* snowTexture, Texture* swordTexture);
 void DRLightPass(GBuffer *gBuffer, BloomBuffer *bloomBuffer, Mesh *fullScreenQuad, GLuint *program, Shader *geometryPass);
-void particlePass(Particle * particle, Camera * camera, Shader * particleShader, float deltaTime);
+void particlePass(FinalFBO * finalFBO, Particle * particle, Camera * camera, Shader * particleShader, float deltaTime);
 void lightSpherePass(Shader *pointLightPass, BloomBuffer *bloomBuffer, PointLightHandler *lights, Camera *camera, double counter);
 void blurPass(Shader *blurShader, BloomBuffer *bloomBuffer, BlurBuffer *blurBuffers, Mesh *fullScreenTriangle);
-void finalPass(Shader *finalShader, BloomBuffer *bloomBuffer, BlurBuffer *blurBuffers, Mesh *fullScreenTriangle);
+void finalBloomPass(Shader *finalBloomShader, FinalFBO * finalFBO, BloomBuffer *bloomBuffer, BlurBuffer *blurBuffers, Mesh *fullScreenTriangle);
+void finalPass(FinalFBO * finalFBO, Shader * finalShader, Mesh *fullScreenTriangle);
 
 void sendCameraLocationToGPU(GLuint cameraLocation, Camera *camera);
 void prepareTexture(GLuint textureLoc, GLuint normalMapLoc);
@@ -75,6 +77,10 @@ int main()
 	blurShader.CreateShader(".\\blurShader.vs", GL_VERTEX_SHADER);
 	blurShader.CreateShader(".\\blurShader.fs", GL_FRAGMENT_SHADER);
 
+	Shader finalBloomShader;
+	finalBloomShader.CreateShader(".\\finalBloomShader.vs", GL_VERTEX_SHADER);
+	finalBloomShader.CreateShader(".\\finalBloomShader.fs", GL_FRAGMENT_SHADER);
+
 	Shader finalShader;
 	finalShader.CreateShader(".\\finalShader.vs", GL_VERTEX_SHADER);
 	finalShader.CreateShader(".\\finalShader.fs", GL_FRAGMENT_SHADER);
@@ -83,8 +89,9 @@ int main()
 	lightPass.initiateShaders(false);
 	particleShader.initiateShaders(false);
 	pointLightPass.initiateShaders(true);
-	blurShader.initiateShaders(false);			//dessa returnar inte ens en bool så pallade inte börja böka, lel
-	finalShader.initiateShaders(false);			//ser dock inget fel på koden i initen, men kanske är lite cp
+	blurShader.initiateShaders(false);
+	finalBloomShader.initiateShaders(false);
+	finalShader.initiateShaders(false);
 	
 	Camera camera(glm::vec3(-15, 25, -53), 70.0f, (float)SCREENWIDTH / (float)SCREENHEIGHT, 0.01f, 1000.0f);
 	
@@ -125,6 +132,9 @@ int main()
 	BlurBuffer blurBuffers;
 	blurBuffers.Init(SCREENWIDTH, SCREENHEIGHT);
 
+	FinalFBO finalFBO;
+	finalFBO.Init(SCREENWIDTH, SCREENHEIGHT);
+
 	// https://rauwendaal.net/2014/06/14/rendering-a-screen-covering-triangle-in-opengl/
 	Vertex fullScreenVerticesTriangle[] =
 	{ 
@@ -153,7 +163,6 @@ int main()
 	lights.createLight(glm::vec3(15.0f, 7.0f, 15.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	lights.createLight(glm::vec3(7.0f, 7.0f, 15.0f), glm::vec3(0.3f, 0.0f, 0.0f));
 
-	
 	lights.initiateLights(lightPass.getProgram());
 
 	Particle particle;
@@ -202,14 +211,22 @@ int main()
 		// ================== Light Pass - Deffered Rendering ==================
 		
 		// Draw lightSpheres
+		bloomBuffer.copyDepth(SCREENWIDTH, SCREENHEIGHT, gBuffer.getFBO());
 		lightSpherePass(&pointLightPass, &bloomBuffer, &lights, &camera, counter);
 			
+		// Blur the bright texture
 		blurPass(&blurShader, &bloomBuffer, &blurBuffers, &fullScreenTriangle);
+		// Combine the bright texture and the scene and store the Result in FinalFBO.
+		finalBloomPass(&finalBloomShader, &finalFBO, &bloomBuffer, &blurBuffers, &fullScreenTriangle);
 
-		finalPass(&finalShader, &bloomBuffer, &blurBuffers, &fullScreenTriangle);
+		// Copy the depth from the bloomBuffer to the finalFBO
+		finalFBO.copyDepth(SCREENWIDTH, SCREENHEIGHT, bloomBuffer.getFBO());
 
-		// Draw particles
-		particlePass(&particle, &camera, &particleShader, deltaTime);
+		// Draw particles to the FinalFBO
+		particlePass(&finalFBO, &particle, &camera, &particleShader, deltaTime);
+
+		// Render everything
+		finalPass(&finalFBO, &finalShader, &fullScreenTriangle);
 
 		// Check for mouse/keyboard inputs and handle the camera movement
 		mouseControls(&display, &camera);
@@ -233,7 +250,7 @@ void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Came
 
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	//EVENTUELLT gör detta till egen funktion i Display
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	glEnable(GL_DEPTH_TEST);
 
@@ -269,9 +286,9 @@ void DRLightPass(GBuffer *gBuffer, BloomBuffer *bloomBuffer, Mesh *fullScreenTri
 }
 
 // This function draws particles to the screen.
-void particlePass(Particle * particle, Camera * camera, Shader * particleShader, float deltaTime)
+void particlePass(FinalFBO * finalFBO, Particle * particle, Camera * camera, Shader * particleShader, float deltaTime)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	finalFBO->bindForWriting();
 
 	// We need the camera right/up vector and the camera location in world space to be able to make billboards out of the particles
 	// PS = ParticleShader
@@ -323,30 +340,12 @@ void lightSpherePass(Shader *pointLightPass, BloomBuffer *bloomBuffer, PointLigh
 	}
 	pointLightPass->unBind();
 	glDisable(GL_CULL_FACE);
-
-	// TEST FÖR ATT SE OM RÄTT SAKER HAR SPARATS I BLOOMBUFFER
-	/*glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	bloomBuffer->bindForReading();
-
-	GLsizei HalfWidth = (GLsizei)(SCREENWIDTH/ 2.0f);
-	GLsizei HalfHeight = (GLsizei)(SCREENHEIGHT / 2.0f);
-
-	bloomBuffer->setReadBuffer(BloomBuffer::BLOOMBUFFER_TEXTURE_TYPE_DIFFUSE);
-	glBlitFramebuffer(0, 0, SCREENWIDTH, SCREENHEIGHT,
-		0, 0, SCREENWIDTH, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-
-	bloomBuffer->setReadBuffer(BloomBuffer::BLOOMBUFFER_TEXTURE_TYPE_BLOOMMAP);
-	glBlitFramebuffer(0, 0, SCREENWIDTH, SCREENHEIGHT,
-		0, HalfHeight, SCREENWIDTH, SCREENHEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR);*/
 }
 
 void blurPass(Shader *blurShader, BloomBuffer *bloomBuffer, BlurBuffer *blurBuffers, Mesh *fullScreenTriangle)
 {
 	blurShader->Bind();
-	int timesToBlur = 100;
+	int timesToBlur = 10;
 	bool horizontal = true;
 	bool firstBlur = true;
 
@@ -369,7 +368,6 @@ void blurPass(Shader *blurShader, BloomBuffer *bloomBuffer, BlurBuffer *blurBuff
 			blurBuffers->bindForReading(horizontal, 0);
 			blurShader->sendGBufferVariablesToGPU("horizontal", !horizontal);
 
-			// 1 because we have different fbo's, so the ENUM doesn't work properly
 			blurShader->sendGBufferVariablesToGPU("scene", 0);
 		}
 		
@@ -385,32 +383,36 @@ void blurPass(Shader *blurShader, BloomBuffer *bloomBuffer, BlurBuffer *blurBuff
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	// Test for blur
-	/*glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	blurBuffers->bindForReading(1);
-
-	GLsizei HalfWidth = (GLsizei)(SCREENWIDTH / 2.0f);
-	GLsizei HalfHeight = (GLsizei)(SCREENHEIGHT / 2.0f);
-
-	blurBuffers->setReadBuffer(BlurBuffer::BLURBUFFER_TEXTURE_TYPE_BLUR);
-	glBlitFramebuffer(0, 0, SCREENWIDTH, SCREENHEIGHT,
-		0, 0, SCREENWIDTH, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);*/
 }
 
-void finalPass(Shader *finalShader, BloomBuffer *bloomBuffer, BlurBuffer *blurBuffers, Mesh *fullScreenTriangle)
+void finalBloomPass(Shader *finalBloomShader, FinalFBO * finalFBO, BloomBuffer *bloomBuffer, BlurBuffer *blurBuffers, Mesh *fullScreenTriangle)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	finalFBO->bindForWriting();
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	finalShader->Bind();
+	finalBloomShader->Bind();
 
 	bloomBuffer->bindForReadingDiffuse();
-	finalShader->sendGBufferVariablesToGPU("scene", 0);
+	finalBloomShader->sendGBufferVariablesToGPU("scene", 0);
 
 	blurBuffers->bindForReading(1, 1);
-	finalShader->sendGBufferVariablesToGPU("bright", 1);
+	finalBloomShader->sendGBufferVariablesToGPU("bright", 1);
+
+	glDisable(GL_DEPTH_TEST);
+	fullScreenTriangle->Draw();
+	glEnable(GL_DEPTH_TEST);
+
+}
+
+void finalPass(FinalFBO * finalFBO, Shader * finalShader, Mesh * fullScreenTriangle)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	finalFBO->bindForReading(0);
+
+	finalShader->Bind();
+	finalShader->sendGBufferVariablesToGPU("scene", 0);
 
 	glDisable(GL_DEPTH_TEST);
 	fullScreenTriangle->Draw();

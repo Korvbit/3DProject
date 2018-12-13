@@ -56,6 +56,8 @@ void Shader::initiateShaders(bool color)
 	// Berättar för GPU'n vad namnet på inkommande variabel är.
 	uniforms[TRANSFORM_U] = glGetUniformLocation(program, "transformationMatrix");
 	uniforms[WORLD_U] = glGetUniformLocation(program, "WorldMatrix");
+
+	std::cout << "asd  " << std::endl;
 }
 
 

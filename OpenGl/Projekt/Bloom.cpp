@@ -50,10 +50,20 @@ bool BloomBuffer::Init(unsigned int SCREENWIDTH, unsigned int SCREENHEIGHT)
 	glDrawBuffers(BLOOMBUFFER_NUM_TEXTURES, attachments);
 
 	// Depth texture
-	glGenRenderbuffers(1, &m_depthTexture);
-	glBindRenderbuffer(GL_RENDERBUFFER, m_depthTexture);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCREENWIDTH, SCREENHEIGHT);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depthTexture);
+	//glGenRenderbuffers(1, &m_depthTexture);
+	//glBindRenderbuffer(GL_RENDERBUFFER, m_depthTexture);
+	//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCREENWIDTH, SCREENHEIGHT);
+	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depthTexture);
+
+
+
+	glGenTextures(1, &m_depthTexture);
+	// Make the depthTexture active
+	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
+	// Allocate Storage for the depthTexture
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, SCREENWIDTH, SCREENHEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	// Attach the depth texture to the framebuffer (GL_DEPTH_ATTATCHMENT)
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture, 0);
 
 	// Felcheckar
 	GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -82,13 +92,8 @@ void BloomBuffer::bindForReading()
 		// if we have different textures to bind, we need to change the current texture openGL is working with.
 		glActiveTexture(GL_TEXTURE0 + i);
 		// Now when we bind, the bind will affect the current texture that got called by :glActivateTexture
-		glBindTexture(GL_TEXTURE_2D, m_colorBuffers[BLOOMBUFFER_NUM_TEXTURES + i]);
+		glBindTexture(GL_TEXTURE_2D, m_colorBuffers[BLOOMBUFFER_TEXTURE_TYPE_DIFFUSE + i]);
 	}
-}
-
-void BloomBuffer::setReadBuffer(BLOOMBUFFER_TEXTURE_TYPE TextureType)
-{
-	glReadBuffer(GL_COLOR_ATTACHMENT0 + TextureType);
 }
 
 void BloomBuffer::bindForReadingBloomMap(int textureUnit)
@@ -109,4 +114,16 @@ void BloomBuffer::bindForReadingDiffuse()
 	glActiveTexture(GL_TEXTURE0);
 	// Now when we bind, the bind will affect the current texture that got called by :glActivateTexture
 	glBindTexture(GL_TEXTURE_2D, m_colorBuffers[BLOOMBUFFER_TEXTURE_TYPE_DIFFUSE]);
+}
+
+void BloomBuffer::copyDepth(unsigned int SCREENWIDTH, unsigned int SCREENHEIGHT, GLuint fboRead)
+{
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, fboRead);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, this->m_fbo);
+	glBlitFramebuffer(0, 0, SCREENWIDTH, SCREENHEIGHT, 0, 0, SCREENWIDTH, SCREENHEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+}
+
+GLuint BloomBuffer::getFBO()
+{
+	return this->m_fbo;
 }

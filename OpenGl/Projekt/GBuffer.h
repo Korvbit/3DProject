@@ -30,11 +30,8 @@ public:
 	// A FBO is a container for textures and an optional depth buffer
 	void BindForReading();
 
-	void bindDepth(unsigned int SCREENWIDTH, unsigned int SCREENHEIGHT);
+	GLuint getFBO();
 private:
-
-	unsigned int SCREENWIDTH = 800;
-	unsigned int SCREENHEIGHT = 600;
 	
 	GLuint m_fbo;
 	GLuint m_textures[GBUFFER_NUM_TEXTURES];

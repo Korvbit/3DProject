@@ -21,10 +21,12 @@ public:
 	void bindForWriting();
 	void bindForReading();
 
-	// temp skit
-	void setReadBuffer(BLOOMBUFFER_TEXTURE_TYPE TextureType);
 	void bindForReadingBloomMap(int textureUnit);
 	void bindForReadingDiffuse();
+
+	void copyDepth(unsigned int SCREENWIDTH, unsigned int SCREENHEIGHT, GLuint fboRead);
+
+	GLuint getFBO();
 
 private:
 	GLuint m_fbo;
