@@ -179,6 +179,9 @@
     <None Include="particleShader.vs" />
     <None Include="pointLightShader.fs" />
     <None Include="pointLightShader.vs" />
+    <None Include="shadowShader.fs" />
+    <None Include="shadowShader.gs" />
+    <None Include="shadowShader.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

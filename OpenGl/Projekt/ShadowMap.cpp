@@ -22,7 +22,7 @@ bool ShadowMap::Init()
 
 	// Create 6 textures (a cubemap)
 	for (unsigned int i = 0; i < 6; ++i)
-	{
+	{																		//Ska detta verkligen vara 1024 f;r oss?
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	}
 		
@@ -45,7 +45,6 @@ bool ShadowMap::Init()
 		printf("FB error, status: 0x%x\n", Status);
 		success = false;
 	}
-
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
