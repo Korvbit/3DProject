@@ -48,8 +48,8 @@ void main()
 
 	for(int i = 0; i < NR_OF_POINT_LIGHTS; i++)
 	{
-		if(length(PointLights[i].position.xyz - pixelPos.xyz) < 10)
-		{
+		//if(length(PointLights[i].position.xyz - pixelPos.xyz) < 10)
+		//{
 			// Diffuse
 			lightDir = normalize(PointLights[i].position.xyz - pixelPos.xyz);
 			alpha = dot(normal.xyz,lightDir);
@@ -64,7 +64,7 @@ void main()
 			// attenuation
 			distancePixelToLight = length(PointLights[i].position - pixelPos);
 			attenuation = 1.0f / (1.0f + (0.1 * distancePixelToLight)+ (0.01 * pow(distancePixelToLight, 2)));
-		}	
+		//}	
 	}
 	vec4 finalColor = ambient + attenuation*(diffuse + specular);
 	finalColor = min(vec4(1.0f,1.0f,1.0f,1.0f), finalColor);

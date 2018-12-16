@@ -16,6 +16,7 @@
 #include "Bloom.h"
 #include "Blur.h"
 #include "FinalFBO.h"
+#include "ShadowMap.h"
 
 // Finns en main funktion i GLEW, därmed måste vi undefinera den innan vi kan använda våran main
 #undef main
@@ -135,6 +136,10 @@ int main()
 	FinalFBO finalFBO;
 	finalFBO.Init(SCREENWIDTH, SCREENHEIGHT);
 
+	ShadowMap shadowMap;
+	shadowMap.Init();
+
+
 	// https://rauwendaal.net/2014/06/14/rendering-a-screen-covering-triangle-in-opengl/
 	Vertex fullScreenVerticesTriangle[] =
 	{ 
@@ -154,14 +159,14 @@ int main()
 
 	// Create Lights
 	PointLightHandler lights;
-	lights.createLight(glm::vec3(10.0f, 7.0f, -3.0f), glm::vec3(1.0f, 0.0f, 1.0f));
-	lights.createLight(glm::vec3(-7.0f, 7.0f, -3.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+	lights.createLight(glm::vec3(7.0f, 10.0f, -6.0f), glm::vec3(1.0f, 0.0f, 1.0f));
+	/*lights.createLight(glm::vec3(-7.0f, 7.0f, -3.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 	lights.createLight(glm::vec3(0.0f, 7.0f, -20.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	lights.createLight(glm::vec3(4.0f, 7.0f, -10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	lights.createLight(glm::vec3(-4.0f, 7.0f, -10.0f), glm::vec3(0.0f, 1.0f, 0.5f));
 	lights.createLight(glm::vec3(0.0f, 7.0f, 6.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 	lights.createLight(glm::vec3(15.0f, 7.0f, 15.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	lights.createLight(glm::vec3(7.0f, 7.0f, 15.0f), glm::vec3(0.3f, 0.0f, 0.0f));
+	lights.createLight(glm::vec3(7.0f, 7.0f, 15.0f), glm::vec3(0.3f, 0.0f, 0.0f));*/
 
 	lights.initiateLights(lightPass.getProgram());
 

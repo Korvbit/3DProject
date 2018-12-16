@@ -1,15 +1,19 @@
 ﻿  Main.cpp
-c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(226): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(260): warning C4018: '<': signed/unsigned mismatch
-c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(336): warning C4018: '<': signed/unsigned mismatch
-c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(453): warning C4305: '=': truncation from 'double' to 'T'
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(231): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(265): warning C4018: '<': signed/unsigned mismatch
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(341): warning C4018: '<': signed/unsigned mismatch
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(458): warning C4305: '=': truncation from 'double' to 'T'
           with
           [
               T=float
           ]
-c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(454): warning C4305: '=': truncation from 'double' to 'T'
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(459): warning C4305: '=': truncation from 'double' to 'T'
           with
           [
               T=float
           ]
+  PointLight.cpp
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\pointlight.cpp(21): warning C4018: '<': signed/unsigned mismatch
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\pointlight.cpp(38): warning C4018: '<': signed/unsigned mismatch
+  Generating Code...
   Projekt.vcxproj -> C:\Users\joaki\Dropbox\Joakim\BTH\Term HT-2017\3D-prog\3D Projekt\3DProject\OpenGl\Projekt\Debug\Projekt.exe

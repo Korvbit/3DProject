@@ -8,6 +8,9 @@
 #include "Mesh.h"
 #include "Transform.h"
 
+#include <glm\glm.hpp>
+#include <string>
+
 using namespace std;
 
 const int MAX_NUMBER_OF_LIGHTS = 256;
