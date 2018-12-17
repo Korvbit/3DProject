@@ -7,5 +7,5 @@ uniform mat4 worldMatrix;
 void main()
 {
 	// The vertex is transformed to worldspace and then sent to the GS
-	gl_position = worldMatrix * vec4(position, 1.0f);
+	gl_Position = worldMatrix * vec4(position, 1.0f);
 }

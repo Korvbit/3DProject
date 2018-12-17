@@ -22,7 +22,10 @@ public:
 	GLuint CreateShader(const std::string& fileName, GLenum shaderType);
 	GLuint *getProgram();
 
-	void sendGBufferVariablesToGPU(const char *name, int value);
+	void sendInt(const char *name, int value);
+	void sendFloat(const char *name, float value);
+	void sendVec3(const char *name, float x, float y, float z);
+	void sendMat4(const char *name, const glm::mat4 &mat);
 
 	virtual ~Shader();
 private:

@@ -21,6 +21,27 @@ uniform sampler2D gPosition;
 uniform sampler2D gDiffuse;
 uniform sampler2D gNormal;
 
+// ShadowBuffer variables
+uniform samplerCube shadowMap;
+uniform float farPlane;
+
+float calculateShadows(vec3 objPos)
+{
+	vec3 objToLight = objPos - PointLights[0].position.xyz;
+	float depthValue = texture(shadowMap, objToLight).x;
+	depthValue *= farPlane;
+	float currDepth = length(objToLight);
+	float bias = 0.05f; // Avoids "Shadow Acne"
+
+	float shadow;
+	if(currDepth - bias >depthValue)
+		shadow = 1.0f;
+	else
+		shadow = 0.0f;
+
+	return shadow;
+}
+
 void main()
 {
 	// Sample from the gBuffer
@@ -66,7 +87,10 @@ void main()
 			attenuation = 1.0f / (1.0f + (0.1 * distancePixelToLight)+ (0.01 * pow(distancePixelToLight, 2)));
 		//}	
 	}
-	vec4 finalColor = ambient + attenuation*(diffuse + specular);
+
+	float shadow = calculateShadows(pixelPos);
+
+	vec4 finalColor = ambient + ((1 - shadow) * attenuation*(diffuse + specular));
 	finalColor = min(vec4(1.0f,1.0f,1.0f,1.0f), finalColor);
 
 	fragment_color = vec4(finalColor.xyz, 1.0f);
@@ -84,6 +108,16 @@ void main()
 		bright_color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	}
 
+
+
+	if(shadow == 1)
+	{
+		fragment_color = vec4(0.0f,1.0f,0.0f,1.0f);
+	}
+	else
+	{
+		fragment_color = vec4(1.0f,0.0f,0.0f,1.0f);
+	}
 
 	//fragment_color = vec4(normal, 1.0f);
 	// Tester

@@ -3,7 +3,7 @@
 in vec4 worldPos;
 
 uniform vec3 lightPos;
-uniform vec3 farPlane;
+uniform float farPlane;
 
 void main()
 {

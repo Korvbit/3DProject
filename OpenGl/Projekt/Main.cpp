@@ -37,8 +37,9 @@ int SCREENWIDTH = 800;
 int SCREENHEIGHT = 600;
 
 // Shader pass functions
+void shadowPass(Shader *shadowShader, ObjectHandler *OH, PointLightHandler *PLH, ShadowMap *shadowFBO, Camera *camera);
 void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Camera *camera, ObjectHandler *OH, Texture* snowTexture, Texture* swordTexture);
-void DRLightPass(GBuffer *gBuffer, BloomBuffer *bloomBuffer, Mesh *fullScreenQuad, GLuint *program, Shader *geometryPass);
+void DRLightPass(GBuffer *gBuffer, BloomBuffer *bloomBuffer, Mesh *fullScreenQuad, GLuint *program, Shader *geometryPass, ShadowMap *shadowBuffer);
 void particlePass(FinalFBO * finalFBO, Particle * particle, Camera * camera, Shader * particleShader, float deltaTime);
 void lightSpherePass(Shader *pointLightPass, BloomBuffer *bloomBuffer, PointLightHandler *lights, Camera *camera, double counter);
 void blurPass(Shader *blurShader, BloomBuffer *bloomBuffer, BlurBuffer *blurBuffers, Mesh *fullScreenTriangle);
@@ -56,6 +57,11 @@ void mouseControls(Display *display, Camera *camera);
 int main()
 {
 	Display display(SCREENWIDTH, SCREENHEIGHT);
+
+	Shader shadowShader;
+	shadowShader.CreateShader(".\\shadowShader.vs", GL_VERTEX_SHADER);
+	shadowShader.CreateShader(".\\shadowShader.gs", GL_GEOMETRY_SHADER);
+	shadowShader.CreateShader(".\\shadowShader.fs", GL_FRAGMENT_SHADER);
 
 	Shader geometryPass;
 	geometryPass.CreateShader(".\\geometryPass.vs", GL_VERTEX_SHADER);
@@ -86,6 +92,7 @@ int main()
 	finalShader.CreateShader(".\\finalShader.vs", GL_VERTEX_SHADER);
 	finalShader.CreateShader(".\\finalShader.fs", GL_FRAGMENT_SHADER);
 
+	shadowShader.initiateShaders(false);
 	geometryPass.initiateShaders(false);
 	lightPass.initiateShaders(false);
 	particleShader.initiateShaders(false);
@@ -189,6 +196,8 @@ int main()
 		deltaTime = currentTime - lastTime;
 		lastTime = glfwGetTime();
 
+		shadowPass(&shadowShader, &OH, &lights, &shadowMap, &camera);
+
 		// ================== Geometry Pass - Deffered Rendering ==================
 
 		geometryPass.Bind();
@@ -210,7 +219,7 @@ int main()
 		sendCameraLocationToGPU(cameraLocationLP, &camera);
 		
 		// Here the fullscreenTriangel is drawn, and lights are sent to the GPU
-		DRLightPass(&gBuffer, &bloomBuffer, &fullScreenTriangle, lightPass.getProgram(), &lightPass);
+		DRLightPass(&gBuffer, &bloomBuffer, &fullScreenTriangle, lightPass.getProgram(), &lightPass, &shadowMap);
 		lightPass.unBind();
 
 		// ================== Light Pass - Deffered Rendering ==================
@@ -249,6 +258,39 @@ int main()
 	return 0;
 }
 
+void shadowPass(Shader *shadowShader, ObjectHandler *OH, PointLightHandler *PLH, ShadowMap *shadowFBO, Camera *camera)
+{
+	shadowShader->Bind();
+	shadowFBO->bind();
+	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	vector<glm::mat4> shadowTransforms;
+	glm::vec3 lightPos;
+
+	for (int i = 0; i < PLH->getNrOfLights(); i++)
+	{
+		shadowTransforms = PLH->getShadowTransform(i);
+		lightPos = PLH->getTransform(i)->GetPos();
+		for (int j = 0; j < 6; ++j)
+		{
+			shadowShader->sendMat4("shadowMatrices[" + (char)j + ']', shadowTransforms[j]);
+		}
+		shadowShader->sendFloat("farPlane", (float)FAR_PLANE);
+		shadowShader->sendVec3("lightPos", lightPos.x, lightPos.y, lightPos.z);
+
+		for (int j = 0; j < OH->getNrOfObjects(); j++)
+		{
+			shadowShader->Update(OH->getObject(j)->GetTransform(), *camera);
+			OH->getObject(j)->bindTexture();
+			OH->getObject(j)->Draw();
+		}
+	}
+
+	glViewport(0, 0, SCREENWIDTH, SCREENHEIGHT);
+	shadowShader->unBind();
+}
+
 void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Camera *camera, ObjectHandler *OH, Texture *snowTexture, Texture *swordTexture)
 {
 	gBuffer->BindForWriting();
@@ -272,7 +314,7 @@ void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Came
 	//glDisable(GL_DEPTH_TEST);
 }
 
-void DRLightPass(GBuffer *gBuffer, BloomBuffer *bloomBuffer, Mesh *fullScreenTriangle, GLuint *program, Shader *lightPass)
+void DRLightPass(GBuffer *gBuffer, BloomBuffer *bloomBuffer, Mesh *fullScreenTriangle, GLuint *program, Shader *lightPass, ShadowMap *shadowBuffer)
 {
 	// Bloom buffer, write finalColor and brightness.
 	bloomBuffer->bindForWriting();
@@ -281,10 +323,14 @@ void DRLightPass(GBuffer *gBuffer, BloomBuffer *bloomBuffer, Mesh *fullScreenTri
 
 	gBuffer->BindForReading();
 
-	lightPass->sendGBufferVariablesToGPU("gPosition", GBuffer::GBUFFER_TEXTURE_TYPE_POSITION);
-	lightPass->sendGBufferVariablesToGPU("gDiffuse", GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);
-	lightPass->sendGBufferVariablesToGPU("gNormal", GBuffer::GBUFFER_TEXTURE_TYPE_NORMAL);
+	lightPass->sendInt("gPosition", GBuffer::GBUFFER_TEXTURE_TYPE_POSITION);
+	lightPass->sendInt("gDiffuse", GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);
+	lightPass->sendInt("gNormal", GBuffer::GBUFFER_TEXTURE_TYPE_NORMAL);
 	
+	shadowBuffer->bindForReading(3);
+	lightPass->sendInt("shadowMap", 3);
+	lightPass->sendFloat("farPlane", (float)FAR_PLANE);
+
 	glDisable(GL_DEPTH_TEST);
 	fullScreenTriangle->Draw();
 	glEnable(GL_DEPTH_TEST);
@@ -365,15 +411,15 @@ void blurPass(Shader *blurShader, BloomBuffer *bloomBuffer, BlurBuffer *blurBuff
 		if (firstBlur == true)
 		{
 			bloomBuffer->bindForReadingBloomMap(0);
-			blurShader->sendGBufferVariablesToGPU("horizontal", !horizontal);
-			blurShader->sendGBufferVariablesToGPU("scene", 0);
+			blurShader->sendInt("horizontal", !horizontal);
+			blurShader->sendInt("scene", 0);
 		}
 		else
 		{
 			blurBuffers->bindForReading(horizontal, 0);
-			blurShader->sendGBufferVariablesToGPU("horizontal", !horizontal);
+			blurShader->sendInt("horizontal", !horizontal);
 
-			blurShader->sendGBufferVariablesToGPU("scene", 0);
+			blurShader->sendInt("scene", 0);
 		}
 		
 		glDisable(GL_DEPTH_TEST);
@@ -399,10 +445,10 @@ void finalBloomPass(Shader *finalBloomShader, FinalFBO * finalFBO, BloomBuffer *
 	finalBloomShader->Bind();
 
 	bloomBuffer->bindForReadingDiffuse();
-	finalBloomShader->sendGBufferVariablesToGPU("scene", 0);
+	finalBloomShader->sendInt("scene", 0);
 
 	blurBuffers->bindForReading(1, 1);
-	finalBloomShader->sendGBufferVariablesToGPU("bright", 1);
+	finalBloomShader->sendInt("bright", 1);
 
 	glDisable(GL_DEPTH_TEST);
 	fullScreenTriangle->Draw();
@@ -417,7 +463,7 @@ void finalPass(FinalFBO * finalFBO, Shader * finalShader, Mesh * fullScreenTrian
 	finalFBO->bindForReading(0);
 
 	finalShader->Bind();
-	finalShader->sendGBufferVariablesToGPU("scene", 0);
+	finalShader->sendInt("scene", 0);
 
 	glDisable(GL_DEPTH_TEST);
 	fullScreenTriangle->Draw();

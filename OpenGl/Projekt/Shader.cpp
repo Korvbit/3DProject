@@ -72,9 +72,24 @@ Shader::~Shader()
 	glDeleteProgram(program);
 }
 
-void Shader::sendGBufferVariablesToGPU(const char *name, int value)
+void Shader::sendInt(const char *name, int value)
 {
 	glUniform1i(glGetUniformLocation(program, name), value);
+}
+
+void Shader::sendFloat(const char * name, float value)
+{
+	glUniform1f(glGetUniformLocation(this->program, name), value);
+}
+
+void Shader::sendVec3(const char * name, float x, float y, float z)
+{
+	glUniform3f(glGetUniformLocation(this->program, name), x, y, z);
+}
+
+void Shader::sendMat4(const char *name, const glm::mat4 &mat)
+{
+	glUniformMatrix4fv(glGetUniformLocation(this->program, name), 1, GL_FALSE, &mat[0][0]);
 }
 
 void CheckShaderError(GLuint shader, GLuint flag, bool isProgram, const std::string & errorMessage)

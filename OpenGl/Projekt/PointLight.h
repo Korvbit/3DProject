@@ -14,12 +14,16 @@
 using namespace std;
 
 const int MAX_NUMBER_OF_LIGHTS = 256;
+const int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+const int NEAR_PLANE = 1, FAR_PLANE = 25;
 
 class PointLight
 {
 private:
 	Mesh mesh;
 	Transform transform;
+	glm::mat4 shadowProj;
+	vector<glm::mat4> shadowTransforms;
 	glm::vec3 color;
 public:
 	PointLight();
@@ -30,6 +34,10 @@ public:
 	glm::vec3& GetColor();
 	
 	Transform *getTransform();
+	vector<glm::mat4> &GetShadowTransforms();
+
+	void createShadowTransforms();
+
 	void Draw();
 	virtual ~PointLight();
 };
@@ -52,6 +60,8 @@ public:
 	void sendToShader();
 	void initiateLights(GLuint *program);
 	void Draw(int index);
+	
+	vector<glm::mat4> getShadowTransform(int index);
 
 	GLuint getNrOfLights();
 	Transform *getTransform(int index);

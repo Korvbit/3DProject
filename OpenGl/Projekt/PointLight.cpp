@@ -12,6 +12,8 @@ void PointLightHandler::createLight(glm::vec3 position, glm::vec3 color)
 	this->lightArray[this->nrOfLights].GetColor() = color;
 	this->lightArray[this->nrOfLights].GetScale() = glm::vec3(0.2f,0.2f,0.2f);
 
+	this->lightArray[this->nrOfLights].createShadowTransforms();
+
 	this->nrOfLights++;
 }
 
@@ -54,6 +56,11 @@ void PointLightHandler::Draw(int index)
 	lightArray[index].Draw();
 }
 
+vector<glm::mat4> PointLightHandler::getShadowTransform(int index)
+{
+	return this->lightArray[index].GetShadowTransforms();
+}
+
 GLuint PointLightHandler::getNrOfLights()
 {
 	return this->nrOfLights;
@@ -71,7 +78,10 @@ PointLightHandler::~PointLightHandler()
 
 PointLight::PointLight()
 {
-
+	float aspect = (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT;
+	float near = (float)NEAR_PLANE;
+	float far = (float)FAR_PLANE;
+	this->shadowProj = glm::perspective(glm::radians(90.0f), aspect, near, far);
 }
 
 Mesh & PointLight::GetMesh()
@@ -97,6 +107,21 @@ glm::vec3 & PointLight::GetColor()
 Transform *PointLight::getTransform()
 {
 	return &this->transform;
+}
+
+vector<glm::mat4>& PointLight::GetShadowTransforms()
+{
+	return this->shadowTransforms;
+}
+
+void PointLight::createShadowTransforms()
+{
+	this->shadowTransforms.push_back(this->shadowProj * glm::lookAt(this->GetPos(), this->GetPos() + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	this->shadowTransforms.push_back(this->shadowProj * glm::lookAt(this->GetPos(), this->GetPos() + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	this->shadowTransforms.push_back(this->shadowProj * glm::lookAt(this->GetPos(), this->GetPos() + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+	this->shadowTransforms.push_back(this->shadowProj * glm::lookAt(this->GetPos(), this->GetPos() + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+	this->shadowTransforms.push_back(this->shadowProj * glm::lookAt(this->GetPos(), this->GetPos() + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	this->shadowTransforms.push_back(this->shadowProj * glm::lookAt(this->GetPos(), this->GetPos() + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 }
 
 void PointLight::Draw()
