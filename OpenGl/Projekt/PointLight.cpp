@@ -51,6 +51,12 @@ void PointLightHandler::initiateLights(GLuint *program)
 	this->loc_NrOfLights = glGetUniformLocation(*program, "NR_OF_POINT_LIGHTS");
 }
 
+void PointLightHandler::updateShadowTransform(GLuint cameraIndex)
+{
+	this->lightArray[cameraIndex].resetShadowTransforms();
+	this->lightArray[cameraIndex].createShadowTransforms();
+}
+
 void PointLightHandler::Draw(int index)
 {
 	lightArray[index].Draw();
@@ -122,6 +128,14 @@ void PointLight::createShadowTransforms()
 	this->shadowTransforms.push_back(this->shadowProj * glm::lookAt(this->GetPos(), this->GetPos() + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
 	this->shadowTransforms.push_back(this->shadowProj * glm::lookAt(this->GetPos(), this->GetPos() + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 	this->shadowTransforms.push_back(this->shadowProj * glm::lookAt(this->GetPos(), this->GetPos() + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+}
+
+void PointLight::resetShadowTransforms()
+{
+	for (int i = 0; i < 6; i++)
+	{
+		this->shadowTransforms.pop_back();
+	}
 }
 
 void PointLight::Draw()

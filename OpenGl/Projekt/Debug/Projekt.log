@@ -1,2 +1,22 @@
-﻿  ShadowMap.cpp
+﻿  Main.cpp
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(244): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(276): warning C4018: '<': signed/unsigned mismatch
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(292): warning C4018: '<': signed/unsigned mismatch
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(318): warning C4018: '<': signed/unsigned mismatch
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(395): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(399): warning C4018: '<': signed/unsigned mismatch
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(516): warning C4305: '=': truncation from 'double' to 'T'
+          with
+          [
+              T=float
+          ]
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\main.cpp(517): warning C4305: '=': truncation from 'double' to 'T'
+          with
+          [
+              T=float
+          ]
+  PointLight.cpp
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\pointlight.cpp(23): warning C4018: '<': signed/unsigned mismatch
+c:\users\joaki\dropbox\joakim\bth\term ht-2017\3d-prog\3d projekt\3dproject\opengl\projekt\pointlight.cpp(40): warning C4018: '<': signed/unsigned mismatch
+  Generating Code...
   Projekt.vcxproj -> C:\Users\joaki\Dropbox\Joakim\BTH\Term HT-2017\3D-prog\3D Projekt\3DProject\OpenGl\Projekt\Debug\Projekt.exe

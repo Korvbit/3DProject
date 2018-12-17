@@ -15,7 +15,7 @@ using namespace std;
 
 const int MAX_NUMBER_OF_LIGHTS = 256;
 const int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
-const int NEAR_PLANE = 1, FAR_PLANE = 25;
+const int NEAR_PLANE = 1, FAR_PLANE = 100;
 
 class PointLight
 {
@@ -37,6 +37,7 @@ public:
 	vector<glm::mat4> &GetShadowTransforms();
 
 	void createShadowTransforms();
+	void resetShadowTransforms();
 
 	void Draw();
 	virtual ~PointLight();
@@ -59,6 +60,7 @@ public:
 
 	void sendToShader();
 	void initiateLights(GLuint *program);
+	void updateShadowTransform(GLuint cameraIndex);
 	void Draw(int index);
 	
 	vector<glm::mat4> getShadowTransform(int index);
