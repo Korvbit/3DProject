@@ -16,7 +16,7 @@ void main()
 		{
 			//Skicka vidare en worldPos OCH en lightSpacePos, osäker här med
 			worldPos = gl_in[i].gl_Position;
-			gl_Position = shadowMatrices[i] * worldPos;
+			gl_Position = shadowMatrices[face] * worldPos;
 			EmitVertex();
 		}
 		EndPrimitive();

@@ -56,8 +56,6 @@ void Shader::initiateShaders(bool color)
 	// Berättar för GPU'n vad namnet på inkommande variabel är.
 	uniforms[TRANSFORM_U] = glGetUniformLocation(program, "transformationMatrix");
 	uniforms[WORLD_U] = glGetUniformLocation(program, "WorldMatrix");
-
-	std::cout << "asd  " << std::endl;
 }
 
 
@@ -86,10 +84,14 @@ void Shader::sendVec3(const char * name, float x, float y, float z)
 {
 	glUniform3f(glGetUniformLocation(this->program, name), x, y, z);
 }
-
+/*
 void Shader::sendMat4(const char *name, const glm::mat4 &mat)
 {
 	glUniformMatrix4fv(glGetUniformLocation(this->program, name), 1, GL_FALSE, &mat[0][0]);
+}*/
+void Shader::setMat4(const std::string &name, const glm::mat4 &mat)
+{
+	glUniformMatrix4fv(glGetUniformLocation(this->program, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
 
 void CheckShaderError(GLuint shader, GLuint flag, bool isProgram, const std::string & errorMessage)

@@ -25,6 +25,7 @@ public:
 	void sendInt(const char *name, int value);
 	void sendFloat(const char *name, float value);
 	void sendVec3(const char *name, float x, float y, float z);
+	void setMat4(const std::string &name, const glm::mat4 &mat);
 	void sendMat4(const char *name, const glm::mat4 &mat);
 
 	virtual ~Shader();

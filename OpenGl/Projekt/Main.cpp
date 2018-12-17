@@ -18,6 +18,8 @@
 #include "FinalFBO.h"
 #include "ShadowMap.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 // Finns en main funktion i GLEW, därmed måste vi undefinera den innan vi kan använda våran main
 #undef main
 
@@ -131,6 +133,9 @@ int main()
 	setStartPositions(&OH);
 	//=================================================================================//
 
+	ShadowMap shadowMap;
+	shadowMap.Init();
+
 	GBuffer gBuffer;
 	gBuffer.Init(SCREENWIDTH, SCREENHEIGHT);
 
@@ -143,8 +148,7 @@ int main()
 	FinalFBO finalFBO;
 	finalFBO.Init(SCREENWIDTH, SCREENHEIGHT);
 
-	ShadowMap shadowMap;
-	shadowMap.Init();
+	
 
 
 	// https://rauwendaal.net/2014/06/14/rendering-a-screen-covering-triangle-in-opengl/
@@ -260,6 +264,7 @@ int main()
 
 void shadowPass(Shader *shadowShader, ObjectHandler *OH, PointLightHandler *PLH, ShadowMap *shadowFBO, Camera *camera)
 {
+	glEnable(GL_DEPTH_TEST);
 	shadowShader->Bind();
 	shadowFBO->bind();
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
@@ -271,10 +276,15 @@ void shadowPass(Shader *shadowShader, ObjectHandler *OH, PointLightHandler *PLH,
 	for (int i = 0; i < PLH->getNrOfLights(); i++)
 	{
 		shadowTransforms = PLH->getShadowTransform(i);
+
 		lightPos = PLH->getTransform(i)->GetPos();
+
 		for (int j = 0; j < 6; ++j)
 		{
-			shadowShader->sendMat4("shadowMatrices[" + (char)j + ']', shadowTransforms[j]);
+			//shadowShader->sendMat4("shadowMatrices[" + (char)j + ']', shadowTransforms[j]);
+			shadowShader->setMat4("shadowMatrices[" + std::to_string(j) + "]", shadowTransforms[j]);
+
+			//std::cout << "shadowMatrices[" + (char)j + ']' << std::endl;
 		}
 		shadowShader->sendFloat("farPlane", (float)FAR_PLANE);
 		shadowShader->sendVec3("lightPos", lightPos.x, lightPos.y, lightPos.z);
@@ -289,6 +299,7 @@ void shadowPass(Shader *shadowShader, ObjectHandler *OH, PointLightHandler *PLH,
 
 	glViewport(0, 0, SCREENWIDTH, SCREENHEIGHT);
 	shadowShader->unBind();
+	glDisable(GL_DEPTH_TEST);
 }
 
 void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Camera *camera, ObjectHandler *OH, Texture *snowTexture, Texture *swordTexture)
@@ -381,7 +392,7 @@ void lightSpherePass(Shader *pointLightPass, BloomBuffer *bloomBuffer, PointLigh
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-	//lights->getTransform(6)->GetPos().y = sinf(counter * 5) * 2 + 7;
+	lights->getTransform(0)->GetPos().x = sinf(counter * 5) * 2 + 7;
 
 	pointLightPass->Bind();
 	for (int i = 0; i < lights->getNrOfLights(); i++)

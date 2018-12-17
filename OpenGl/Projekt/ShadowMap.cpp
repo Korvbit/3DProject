@@ -3,11 +3,23 @@
 
 ShadowMap::ShadowMap()
 {
+	this->m_fbo = 0;
+	this->m_depthCubeMap = 0;
 }
 
 
 ShadowMap::~ShadowMap()
 {
+	if (m_fbo != 0)
+	{
+		glDeleteFramebuffers(1, &m_fbo);
+	}
+
+
+	if (m_depthCubeMap != 0)
+	{
+		glDeleteTextures(1, &m_depthCubeMap);
+	}
 }
 
 bool ShadowMap::Init()
@@ -22,7 +34,7 @@ bool ShadowMap::Init()
 
 	// Create 6 textures (a cubemap)
 	for (unsigned int i = 0; i < 6; ++i)
-	{																		//Ska detta verkligen vara 1024 f;r oss?
+	{
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	}
 		
@@ -58,7 +70,7 @@ void ShadowMap::bind()
 
 void ShadowMap::bindForReading(GLuint textureUnit)
 {
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_fbo);
+	//glBindFramebuffer(GL_READ_FRAMEBUFFER, m_fbo);
 
 	glActiveTexture(GL_TEXTURE0 + textureUnit);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_depthCubeMap);

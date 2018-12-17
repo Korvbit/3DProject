@@ -110,14 +110,14 @@ void main()
 
 
 
-	if(shadow == 1)
-	{
-		fragment_color = vec4(0.0f,1.0f,0.0f,1.0f);
-	}
-	else
-	{
-		fragment_color = vec4(1.0f,0.0f,0.0f,1.0f);
-	}
+	//if(shadow == 1)
+	//{
+	//	fragment_color = vec4(0.0f,1.0f,0.0f,1.0f);
+	//}
+	//else
+	//{
+	//	fragment_color = vec4(1.0f,0.0f,0.0f,1.0f);
+	//}
 
 	//fragment_color = vec4(normal, 1.0f);
 	// Tester
