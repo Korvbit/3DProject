@@ -1,27 +1,16 @@
-﻿Generellt ------------------
-
-
-
+﻿
 * Back-face Culling (w. G-Shader) *DONE
 
 * Parsing and rendering an existing model format *DONE
 
-*  Particle system * DONE
-
+* Particle system *DONE
 
 * Normal Mapping *DONE
 
-* Shadow Mapping // Helst om fralle kan ta bort
+* Shadow Mapping *DONE
 
-* View frustum culling against a quadtree // Helst om fralle kan ta bort
+* Deffered Rendering *DONE
 
-
-* Deffered Rendering - DONE
-
-* Tesselation
-
-* Camera, Röra med WASD - DONE 
+* Camera, Röra med WASD *DONE 
 
 * Glow-effect *DONE
-
-

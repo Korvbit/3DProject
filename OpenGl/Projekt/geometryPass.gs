@@ -21,7 +21,7 @@ vec4 createTangent();
 void main()
 {	
 	vec4 normalWorld = createNormalWorld();
-	vec4 tangent = createTangent();
+	vec4 tangent = WorldMatrix * createTangent();
 	vec4 bitangent = vec4(cross(normalWorld.xyz, tangent.xyz), 0.0f);
 
 	vec4 posWorld[3];
@@ -37,7 +37,7 @@ void main()
 		for(int i = 0; i < 3; i++)
 		{
 			// Create the matrix that will transform the normalMap to tangent space.
-			vec4 T = normalize(vec4(WorldMatrix * vec4(tangent.xyz, 0.0)));						// Tangent in world space
+			vec4 T = normalize(vec4(tangent.xyz, 0.0));											// Tangent is already in world space
 			vec4 B = normalize(vec4(WorldMatrix * vec4(bitangent.xyz, 0.0)));					// Bitangent in world space
 			vec4 N = vec4(normalWorld.xyz, 0.0);												// Normal is already in world space
 			
