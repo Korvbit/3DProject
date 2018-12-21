@@ -12,6 +12,7 @@ class ObjectHandler
 {
 public:
 	ObjectHandler();
+	~ObjectHandler();
 
 	int CreateObject(Mesh *mesh, Transform transform, Texture *texture);
 	int CreateObject(const char* filePath, Mesh *mesh, Transform transform, Texture *texture);

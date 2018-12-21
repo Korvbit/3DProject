@@ -51,8 +51,8 @@ unsigned int Mesh::GetDrawCount()
 Mesh::~Mesh()
 {
 	glDeleteVertexArrays(1, &vertexArrayObject);
+	glDeleteBuffers(1, vertexArrayBuffers);
 }
-
 bool Mesh::createMesh(const char * meshPath)
 {
 	bool loaded = false;

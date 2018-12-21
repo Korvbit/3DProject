@@ -23,6 +23,8 @@
 // Finns en main funktion i GLEW, därmed måste vi undefinera den innan vi kan använda våran main
 #undef main
 
+
+
 #define PI 3.1415926535
 
 enum objectIndices
@@ -58,6 +60,8 @@ void mouseControls(Display *display, Camera *camera);
 
 int main()
 {
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
 	Display display(SCREENWIDTH, SCREENHEIGHT);
 
 	Shader shadowShader;
@@ -154,9 +158,9 @@ int main()
 	// https://rauwendaal.net/2014/06/14/rendering-a-screen-covering-triangle-in-opengl/
 	Vertex fullScreenVerticesTriangle[] =
 	{ 
-	Vertex(glm::vec3(-1, 3, 0), glm::vec2(0.0,2.0)),
-	Vertex(glm::vec3(-1, -1, 0), glm::vec2(0.0,0.0)),
-	Vertex(glm::vec3(3, -1, 0), glm::vec2(2.0,0.0)),
+		Vertex(glm::vec3(-1, 3, 0), glm::vec2(0.0,2.0)),
+		Vertex(glm::vec3(-1, -1, 0), glm::vec2(0.0,0.0)),
+		Vertex(glm::vec3(3, -1, 0), glm::vec2(2.0,0.0)),
 	};
 
 	Mesh fullScreenTriangle(fullScreenVerticesTriangle, (sizeof(fullScreenVerticesTriangle) / sizeof(fullScreenVerticesTriangle[0])));
@@ -259,6 +263,7 @@ int main()
 		counter += deltaTime * 0.5;
 		currentTime = glfwGetTime();
 	}
+	glfwTerminate();
 	return 0;
 }
 

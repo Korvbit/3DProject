@@ -11,14 +11,11 @@
 
 * Normal Mapping *DONE
 
-* Shadow Mapping // Helst om fralle kan ta bort
+* Shadow Mapping *DONE
 
-* View frustum culling against a quadtree // Helst om fralle kan ta bort
 
 
 * Deffered Rendering - DONE
-
-* Tesselation
 
 * Camera, Röra med WASD - DONE 
 

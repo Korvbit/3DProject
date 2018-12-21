@@ -34,7 +34,7 @@ float calculateShadows(vec3 objPos)
 	float bias = 0.05f; // Avoids "Shadow Acne"
 
 	float shadow;
-	if(currDepth - bias >depthValue)
+	if(currDepth - bias > depthValue)
 		shadow = 1.0f;
 	else
 		shadow = 0.0f;
@@ -107,8 +107,6 @@ void main()
 	{
 		bright_color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	}
-
-
 
 	//if(shadow == 1)
 	//{

@@ -5,6 +5,11 @@ ObjectHandler::ObjectHandler()
 	this->numberOfObjects = 0;
 }
 
+ObjectHandler::~ObjectHandler()
+{
+
+}
+
 int ObjectHandler::CreateObject(Mesh *mesh, Transform transform, Texture *texture)
 {
 	this->allObjects[this->numberOfObjects] = Object(mesh, transform, texture, this->numberOfObjects);

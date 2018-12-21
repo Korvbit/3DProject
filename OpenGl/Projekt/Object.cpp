@@ -12,6 +12,11 @@ Object::Object()
 {
 }
 
+Object::~Object()
+{
+
+}
+
 glm::mat4 Object::getWorldMatrix() const
 {
 	return this->transform.getWorldMatrix();

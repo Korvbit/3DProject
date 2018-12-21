@@ -10,12 +10,12 @@ BlurBuffer::~BlurBuffer()
 {
 	if (m_fbo[0] != 0)
 	{
-		glDeleteFramebuffers(1, m_fbo);
+		glDeleteFramebuffers(2, m_fbo);
 	}
 
 	if (m_colorBuffers[0] != 0)
 	{
-		glDeleteTextures(BLURBUFFER_NUM_TEXTURES, m_colorBuffers);
+		glDeleteTextures(2, m_colorBuffers);
 	}
 }
 

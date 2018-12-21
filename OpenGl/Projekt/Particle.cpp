@@ -49,8 +49,7 @@ Particle::~Particle()
 	delete[] particlePosSizeBuffer;
 	delete[] particleColorBuffer;
 
-	//glDeleteBuffers(1, &this->particlePosSizeBuffer);
-	//glDeleteBuffers(1, &this->particleColorBuffer);
+	glDeleteBuffers(1, &billboard_vertex_buffer);
 }
 
 int Particle::findDeadParticle()
@@ -80,7 +79,6 @@ void Particle::sort()
 
 void Particle::generateParticles(float deltaTime)
 {
-	// We create 16 new particles every frame
 	int newParticlesToCreate = 2;
 
 	for (int i = 0; i < newParticlesToCreate; i++)

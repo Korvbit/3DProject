@@ -14,6 +14,7 @@ public:
 	Object(Mesh *mesh, Transform transform, Texture *texture, unsigned int m_id = 0);
 	// Default constructor
 	Object();
+	~Object();
 
 	glm::mat4 getWorldMatrix() const;
 	Transform GetTransform() const;
