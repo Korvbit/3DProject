@@ -107,6 +107,7 @@ void Particle::generateParticles(float deltaTime)
 			(rand() % 2000 - 1000.0f) / 1000.0f,
 			(rand() % 2000 - 1000.0f) / 1000.0f
 		);
+
 		this->particleArray[index].speed = mainDir + randomDir; //* spread;
 
 		// Color (White as snow)

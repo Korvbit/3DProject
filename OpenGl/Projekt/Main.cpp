@@ -174,7 +174,7 @@ int main()
 
 	// Create Lights
 	PointLightHandler lights;
-	lights.createLight(glm::vec3(7.0f, 18.0f, -6.0f), glm::vec3(0.0f, 1.0f, 1.0f));
+	lights.createLight(glm::vec3(7.0f, 18.0f, -6.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 	/*lights.createLight(glm::vec3(-7.0f, 7.0f, -3.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 	lights.createLight(glm::vec3(0.0f, 7.0f, -20.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	lights.createLight(glm::vec3(4.0f, 7.0f, -10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -318,7 +318,8 @@ void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Came
 	glEnable(GL_DEPTH_TEST);
 
 	// här ska object uppdateras om de ska röras eller nått
-	
+	OH->getObject(cube1)->GetRot().x = sinf(counter);
+
 	// Update and Draw all objects
 	for (int i = 0; i < OH->getNrOfObjects(); i++)
 	{
@@ -397,7 +398,10 @@ void lightSpherePass(Shader *pointLightPass, BloomBuffer *bloomBuffer, PointLigh
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
+	// translate lights
 	lights->getTransform(0)->GetPos().x = sinf(counter * 5) * 2 + 7;
+
+
 	lights->updateShadowTransform(0);
 
 	pointLightPass->Bind();
@@ -413,7 +417,7 @@ void lightSpherePass(Shader *pointLightPass, BloomBuffer *bloomBuffer, PointLigh
 void blurPass(Shader *blurShader, BloomBuffer *bloomBuffer, BlurBuffer *blurBuffers, Mesh *fullScreenTriangle)
 {
 	blurShader->Bind();
-	int timesToBlur = 10;
+	int timesToBlur = 80;
 	bool horizontal = true;
 	bool firstBlur = true;
 

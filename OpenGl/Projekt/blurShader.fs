@@ -10,6 +10,7 @@ uniform sampler2D scene;
 void main()
 {
 	float fade[5] = {0.2270270270, 0.1945945946, 0.1216216216, 0.0540540541, 0.0162162162};
+
     vec2 offset = 1.0 / textureSize(scene, 0); // gets size of single texel
     vec3 result = texture(scene, texCoord0).rgb * fade[0];
 

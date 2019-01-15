@@ -16,6 +16,7 @@ void main()
 	// Deferred rendering Geometry pass
 	WorldPosOut = posWorld1.xyz;
 	TextureRGBOut = texture2D(texture,texCoords).xyz;
+
 	// Sample the normalMap
 	WorldNormalOut = texture2D(normalMap, texCoords).xyz;
 	// Adjust the values to the range [-1,1], (range is originally [0,1])

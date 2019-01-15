@@ -27,11 +27,11 @@ uniform float farPlane;
 
 float calculateShadows(vec3 objPos)
 {
-	vec3 objToLight = objPos - PointLights[0].position.xyz;
-	float depthValue = texture(shadowMap, objToLight).x;
+	vec3 lightToObj = objPos - PointLights[0].position.xyz;
+	float depthValue = texture(shadowMap, lightToObj).x;
 	depthValue *= farPlane;
-	float currDepth = length(objToLight);
-	float bias = 0.05f; // Avoids "Shadow Acne"
+	float currDepth = length(lightToObj);
+	float bias = 0.15f; // Avoids "Shadow Acne"
 
 	float shadow;
 	if(currDepth - bias > depthValue)
