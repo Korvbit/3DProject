@@ -42,12 +42,12 @@ int SCREENHEIGHT = 600;
 
 // Shader pass functions
 void shadowPass(Shader *shadowShader, ObjectHandler *OH, PointLightHandler *PLH, ShadowMap *shadowFBO, Camera *camera);
-void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Camera *camera, ObjectHandler *OH, Texture* snowTexture, Texture* swordTexture);
-void DRLightPass(GBuffer *gBuffer, BloomBuffer *bloomBuffer, Mesh *fullScreenQuad, GLuint *program, Shader *geometryPass, ShadowMap *shadowBuffer);
-void particlePass(FinalFBO * finalFBO, Particle * particle, Camera * camera, Shader * particleShader, float deltaTime);
+void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Camera *camera, ObjectHandler *OH, Texture* snowTexture, Texture* swordTexture, GLuint cameraLocationGP, GLint texLoc, GLint normalTexLoc);
+void DRLightPass(GBuffer *gBuffer, BloomBuffer *bloomBuffer, Mesh *fullScreenQuad, GLuint *program, Shader *geometryPass, ShadowMap *shadowBuffer, PointLightHandler *lights, GLuint cameraLocationLP, Camera *camera);
 void lightSpherePass(Shader *pointLightPass, BloomBuffer *bloomBuffer, PointLightHandler *lights, Camera *camera, double counter);
 void blurPass(Shader *blurShader, BloomBuffer *bloomBuffer, BlurBuffer *blurBuffers, Mesh *fullScreenTriangle);
 void finalBloomPass(Shader *finalBloomShader, FinalFBO * finalFBO, BloomBuffer *bloomBuffer, BlurBuffer *blurBuffers, Mesh *fullScreenTriangle);
+void particlePass(FinalFBO * finalFBO, Particle * particle, Camera * camera, Shader * particleShader, float deltaTime);
 void finalPass(FinalFBO * finalFBO, Shader * finalShader, Mesh *fullScreenTriangle);
 
 void sendCameraLocationToGPU(GLuint cameraLocation, Camera *camera);
@@ -98,6 +98,8 @@ int main()
 	finalShader.CreateShader(".\\finalShader.vs", GL_VERTEX_SHADER);
 	finalShader.CreateShader(".\\finalShader.fs", GL_FRAGMENT_SHADER);
 
+	// False = Pos and Texcoord
+	// True  = Pos and Color
 	shadowShader.initiateShaders(false);
 	geometryPass.initiateShaders(false);
 	lightPass.initiateShaders(false);
@@ -106,12 +108,23 @@ int main()
 	blurShader.initiateShaders(false);
 	finalBloomShader.initiateShaders(false);
 	finalShader.initiateShaders(false);
-	
+
+	shadowShader.validateShaders();
+	geometryPass.validateShaders();
+	// LightPass is validated before its drawcall (to fix a bug), so its not validated here
+	// LightPass.validateShaders();
+	particleShader.validateShaders();
+	pointLightPass.validateShaders();
+	blurShader.validateShaders();
+	finalBloomShader.validateShaders();
+	finalShader.validateShaders();
+
 	Camera camera(glm::vec3(-15, 25, -53), 70.0f, (float)SCREENWIDTH / (float)SCREENHEIGHT, 0.01f, 1000.0f);
 	
 
 	//=========================== Creating Objects ====================================//
-
+	
+	// Transform includes all three matrices, each object has its own transform
 	Transform transform;
 	Texture swordTexture("Textures/swordTexture.jpg", "NormalMaps/sword_normal.png");
 	Texture brickTexture("Textures/brickwall.jpg", "NormalMaps/brickwall_normal.jpg");
@@ -174,13 +187,8 @@ int main()
 
 	// Create Lights
 	PointLightHandler lights;
-	lights.createLight(glm::vec3(7.0f, 18.0f, -6.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+	lights.createLight(glm::vec3(7.0f, 9.0f, -6.0f), glm::vec3(2.0f, 2.0f, 2.0f));
 	/*lights.createLight(glm::vec3(-7.0f, 7.0f, -3.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-	lights.createLight(glm::vec3(0.0f, 7.0f, -20.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	lights.createLight(glm::vec3(4.0f, 7.0f, -10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	lights.createLight(glm::vec3(-4.0f, 7.0f, -10.0f), glm::vec3(0.0f, 1.0f, 0.5f));
-	lights.createLight(glm::vec3(0.0f, 7.0f, 6.0f), glm::vec3(1.0f, 1.0f, 0.0f));
-	lights.createLight(glm::vec3(15.0f, 7.0f, 15.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	lights.createLight(glm::vec3(7.0f, 7.0f, 15.0f), glm::vec3(0.3f, 0.0f, 0.0f));*/
 
 	lights.initiateLights(lightPass.getProgram());
@@ -204,40 +212,31 @@ int main()
 		deltaTime = currentTime - lastTime;
 		lastTime = glfwGetTime();
 
+
+		// Here a cube map is calculated and stored in the shadowMap FBO
 		shadowPass(&shadowShader, &OH, &lights, &shadowMap, &camera);
 
+
+
 		// ================== Geometry Pass - Deffered Rendering ==================
-
-		geometryPass.Bind();
-
-		sendCameraLocationToGPU(cameraLocationGP, &camera);
-		prepareTexture(texLoc, normalTexLoc);
-
 		// Here all the objets gets transformed, and then sent to the GPU with a draw call
-		DRGeometryPass(&gBuffer, counter, &geometryPass, &camera, &OH, &snowTexture, &swordTexture);
-		geometryPass.unBind();
-
-		// ================== Geometry Pass - Deffered Rendering ==================
+		DRGeometryPass(&gBuffer, counter, &geometryPass, &camera, &OH, &snowTexture, &swordTexture, cameraLocationGP, texLoc, normalTexLoc);
 
 		// ================== Light Pass - Deffered Rendering ==================
-
-		lightPass.Bind();
-
-		lights.sendToShader();
-		sendCameraLocationToGPU(cameraLocationLP, &camera);
-		
 		// Here the fullscreenTriangel is drawn, and lights are sent to the GPU
-		DRLightPass(&gBuffer, &bloomBuffer, &fullScreenTriangle, lightPass.getProgram(), &lightPass, &shadowMap);
-		lightPass.unBind();
+		DRLightPass(&gBuffer, &bloomBuffer, &fullScreenTriangle, lightPass.getProgram(), &lightPass, &shadowMap, &lights, cameraLocationLP, &camera);
 
-		// ================== Light Pass - Deffered Rendering ==================
-		
-		// Draw lightSpheres
+
+
+		// Copy the depth from the gBuffer to the bloomBuffer
 		bloomBuffer.copyDepth(SCREENWIDTH, SCREENHEIGHT, gBuffer.getFBO());
+
+		// Draw lightSpheres
 		lightSpherePass(&pointLightPass, &bloomBuffer, &lights, &camera, counter);
 			
 		// Blur the bright texture
 		blurPass(&blurShader, &bloomBuffer, &blurBuffers, &fullScreenTriangle);
+
 		// Combine the bright texture and the scene and store the Result in FinalFBO.
 		finalBloomPass(&finalBloomShader, &finalFBO, &bloomBuffer, &blurBuffers, &fullScreenTriangle);
 
@@ -278,6 +277,7 @@ void shadowPass(Shader *shadowShader, ObjectHandler *OH, PointLightHandler *PLH,
 	vector<glm::mat4> shadowTransforms;
 	glm::vec3 lightPos;
 
+	// For each light, we create a matrix and draws each light.
 	for (int i = 0; i < PLH->getNrOfLights(); i++)
 	{
 		shadowTransforms = PLH->getShadowTransform(i);
@@ -286,10 +286,7 @@ void shadowPass(Shader *shadowShader, ObjectHandler *OH, PointLightHandler *PLH,
 
 		for (int j = 0; j < 6; ++j)
 		{
-			//shadowShader->sendMat4("shadowMatrices[" + (char)j + ']', shadowTransforms[j]);
 			shadowShader->setMat4("shadowMatrices[" + std::to_string(j) + "]", shadowTransforms[j]);
-
-			//std::cout << "shadowMatrices[" + (char)j + ']' << std::endl;
 		}
 		shadowShader->sendFloat("farPlane", (float)FAR_PLANE);
 		shadowShader->sendVec3("lightPos", lightPos.x, lightPos.y, lightPos.z);
@@ -307,8 +304,13 @@ void shadowPass(Shader *shadowShader, ObjectHandler *OH, PointLightHandler *PLH,
 	glDisable(GL_DEPTH_TEST);
 }
 
-void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Camera *camera, ObjectHandler *OH, Texture *snowTexture, Texture *swordTexture)
+void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Camera *camera, ObjectHandler *OH, Texture *snowTexture, Texture *swordTexture, GLuint cameraLocationGP, GLint texLoc, GLint normalTexLoc)
 {
+	geometryPass->Bind();
+
+	sendCameraLocationToGPU(cameraLocationGP, camera);
+	prepareTexture(texLoc, normalTexLoc);
+
 	gBuffer->BindForWriting();
 
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -328,11 +330,16 @@ void DRGeometryPass(GBuffer *gBuffer, double counter, Shader *geometryPass, Came
 		OH->getObject(i)->Draw();
 	}
 
-	//glDisable(GL_DEPTH_TEST);
+	geometryPass->unBind();
 }
 
-void DRLightPass(GBuffer *gBuffer, BloomBuffer *bloomBuffer, Mesh *fullScreenTriangle, GLuint *program, Shader *lightPass, ShadowMap *shadowBuffer)
+void DRLightPass(GBuffer *gBuffer, BloomBuffer *bloomBuffer, Mesh *fullScreenTriangle, GLuint *program, Shader *lightPass, ShadowMap *shadowBuffer, PointLightHandler *lights, GLuint cameraLocationLP, Camera *camera)
 {
+	lightPass->Bind();
+
+	lights->sendToShader();
+	sendCameraLocationToGPU(cameraLocationLP, camera);
+
 	// Bloom buffer, write finalColor and brightness.
 	bloomBuffer->bindForWriting();
 	bloomBuffer->bindForReading();
@@ -348,9 +355,13 @@ void DRLightPass(GBuffer *gBuffer, BloomBuffer *bloomBuffer, Mesh *fullScreenTri
 	lightPass->sendInt("shadowMap", 3);
 	lightPass->sendFloat("farPlane", (float)FAR_PLANE);
 
+	lightPass->validateShaders();
+
 	glDisable(GL_DEPTH_TEST);
 	fullScreenTriangle->Draw();
 	glEnable(GL_DEPTH_TEST);
+
+	lightPass->unBind();
 }
 
 // This function draws particles to the screen.

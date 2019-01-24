@@ -69,23 +69,20 @@ void main()
 
 	for(int i = 0; i < NR_OF_POINT_LIGHTS; i++)
 	{
-		//if(length(PointLights[i].position.xyz - pixelPos.xyz) < 10)
-		//{
-			// Diffuse
-			lightDir = normalize(PointLights[i].position.xyz - pixelPos.xyz);
-			alpha = dot(normal.xyz,lightDir);
-			diffuse += vec4(materialColor.rgb,1.0f) * vec4(PointLights[i].color.rgb, 1.0f) * max(alpha, 0);
+		// Diffuse
+		lightDir = normalize(PointLights[i].position.xyz - pixelPos.xyz);
+		alpha = dot(normal.xyz,lightDir);
+		diffuse += vec4(materialColor.rgb,1.0f) * vec4(PointLights[i].color.rgb, 1.0f) * max(alpha, 0);
 
-			// Specular
-			vecToCam = normalize(vec3(cameraPosLP.xyz - pixelPos.xyz));	
-			// Source: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/reflect.xhtml
-			reflection = reflect(vec4(-lightDir.xyz, 0.0f), vec4(normal.xyz,1.0f));
-			specular += vec4(materialColor.rgb,1.0f) * vec4(PointLights[i].color.rgb, 1.0f) * pow(max(dot(reflection.xyz, vecToCam.xyz),0), shininess);
+		// Specular
+		vecToCam = normalize(vec3(cameraPosLP.xyz - pixelPos.xyz));	
+		// Source: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/reflect.xhtml
+		reflection = reflect(vec4(-lightDir.xyz, 0.0f), vec4(normal.xyz,1.0f));
+		specular += vec4(materialColor.rgb,1.0f) * vec4(PointLights[i].color.rgb, 1.0f) * pow(max(dot(reflection.xyz, vecToCam.xyz),0), shininess);
 
-			// attenuation
-			distancePixelToLight = length(PointLights[i].position - pixelPos);
-			attenuation = 1.0f / (1.0f + (0.1 * distancePixelToLight)+ (0.01 * pow(distancePixelToLight, 2)));
-		//}	
+		// attenuation
+		distancePixelToLight = length(PointLights[i].position - pixelPos);
+		attenuation = 1.0f / (1.0f + (0.1 * distancePixelToLight)+ (0.01 * pow(distancePixelToLight, 2)));
 	}
 
 	float shadow = calculateShadows(pixelPos);
@@ -107,20 +104,4 @@ void main()
 	{
 		bright_color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	}
-
-	//if(shadow == 1)
-	//{
-	//	fragment_color = vec4(0.0f,1.0f,0.0f,1.0f);
-	//}
-	//else
-	//{
-	//	fragment_color = vec4(1.0f,0.0f,0.0f,1.0f);
-	//}
-
-	//fragment_color = vec4(normal, 1.0f);
-	// Tester
-	//fragment_color = vec4(finalColor.xyz, 1.0f);
-	//fragment_color = vec4(materialColor.xyz, 1.0f);
-	//fragment_color = vec4(1.0f,1.0f,0.0f,1.0f);
-	//fragment_color = vec4(PointLights[1].color.rgb, 1.0f);
 }

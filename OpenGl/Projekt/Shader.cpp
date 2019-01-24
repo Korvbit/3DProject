@@ -50,12 +50,15 @@ void Shader::initiateShaders(bool color)
 	glLinkProgram(program);
 	CheckShaderError(program, GL_LINK_STATUS, true, "Error: Program linking failed: ");
 
-	glValidateProgram(program);
-	CheckShaderError(program, GL_VALIDATE_STATUS, true, "Error: Program is invalid: ");
-
 	// Berättar för GPU'n vad namnet på inkommande variabel är.
 	uniforms[TRANSFORM_U] = glGetUniformLocation(program, "transformationMatrix");
 	uniforms[WORLD_U] = glGetUniformLocation(program, "WorldMatrix");
+}
+
+void Shader::validateShaders()
+{
+	glValidateProgram(program);
+	CheckShaderError(program, GL_VALIDATE_STATUS, true, "Error: Program is invalid: ");
 }
 
 
@@ -143,7 +146,7 @@ std::string LoadShader(const std::string fileName)
 
 GLuint Shader::CreateShader(const std::string & fileName, GLenum shaderType)
 {
-	std::string blabla = LoadShader(fileName);
+	std::string shaderCode = LoadShader(fileName);
 
 	GLuint shader = glCreateShader(shaderType);
 
@@ -153,8 +156,8 @@ GLuint Shader::CreateShader(const std::string & fileName, GLenum shaderType)
 	const GLchar* shaderSourceStrings[1];
 	GLint shaderSourceStringLengths[1];
 
-	shaderSourceStrings[0] = blabla.c_str();
-	shaderSourceStringLengths[0] = blabla.length();
+	shaderSourceStrings[0] = shaderCode.c_str();
+	shaderSourceStringLengths[0] = shaderCode.length();
 
 	glShaderSource(shader, 1, shaderSourceStrings, shaderSourceStringLengths);
 	glCompileShader(shader);

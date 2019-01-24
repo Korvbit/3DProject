@@ -70,7 +70,7 @@ void ShadowMap::bind()
 
 void ShadowMap::bindForReading(GLuint textureUnit)
 {
-	//glBindFramebuffer(GL_READ_FRAMEBUFFER, m_fbo);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_fbo);
 
 	glActiveTexture(GL_TEXTURE0 + textureUnit);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_depthCubeMap);
